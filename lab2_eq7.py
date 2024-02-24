@@ -276,7 +276,66 @@ def assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices):
 
 # FAIRE FONCTION DE READ ICI POUR ASSIGNER COORDONNEES UE ET ANTENNE
 
+# ***********APPELER SEULEEMENT DANS LE CAS D'UN READ**************
+# Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
+def lire_coordonnees_ues(filename):
+    liste_ues_avec_coordonnees = []
 
+    # Ouvrir le fichier en mode lecture
+    with open(fichier, 'r') as f:
+        # Lire chaque ligne du fichier
+        for ligne in f:
+            # Vérifier si la ligne commence par "ue"
+            if ligne.startswith("ue"):
+                # Diviser la ligne en utilisant le caractère de tabulation comme séparateur
+                elements = ligne.strip().split('\t')
+
+                # Récupérer les éléments individuels
+                nom_ue = elements[0]
+                id_ue = int(elements[1])
+                group_ue = elements[2]
+                coord_x_ue = float(elements[3])
+                coord_y_ue = float(elements[4])
+                appname_ue = elements[5]
+
+                # Assigner les elements a l'ue
+                ue = UE(id=id_ue, app_name=appname_ue)
+                ue.coords = [coord_x_ue, coord_y_ue]
+                ue.group = group_ue
+                liste_ues_avec_coordonnees.append(ue)
+
+    return liste_ues_avec_coordonnees
+# ******************************************************************
+
+# ***********APPELER SEULEEMENT DANS LE CAS D'UN READ**************
+# Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
+def lire_coordonnees_antennes(filename):
+    liste_antennes_avec_coordonnees = []
+
+    # Ouvrir le fichier en mode lecture
+    with open(fichier, 'r') as f:
+        # Lire chaque ligne du fichier
+        for ligne in f:
+            # Vérifier si la ligne commence par "antenna"
+            if ligne.startswith("antenna"):
+                # Diviser la ligne en utilisant le caractère de tabulation comme séparateur
+                elements = ligne.strip().split('\t')
+
+                # Récupérer les éléments individuels
+                nom_antenne = elements[0]
+                id_ant = int(elements[1])
+                group_ant = elements[2]
+                coord_x_ant = float(elements[3])
+                coord_y_ant = float(elements[4])
+
+                # Assigner les elements a l'antenne
+                antenna = Antenna(id_ant)
+                antenna.coords = [coord_x_ant, coord_y_ant]
+                antenna.group = group_ant
+                liste_antennes_avec_coordonnees.append(antenna)
+
+    return liste_antennes_avec_coordonnees
+# ******************************************************************
 
 
 
@@ -589,6 +648,9 @@ def lab2 (data_case):
     if mode == False :
         ues = assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices)
         antennas = assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices)
+    if mode == True :
+        ues = lire_coordonnees_ues(coord_file_name)
+        antennas = lire_coordonnees_antennes(coord_file_name)
     return (antennas,ues)
 
 # Fonction vérifiant si le fichier YAML fournit en input a la bonne structure 
