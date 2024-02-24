@@ -28,4 +28,4 @@ ETUDE_PATHLOSS:
       Surface:
          rectangle:
            length : 25 # en kilomètres
-           heigth : 20
+           height : 20

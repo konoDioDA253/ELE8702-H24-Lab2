@@ -550,6 +550,24 @@ def association_ue_antenne(pathlosses, antennas, ues):
     return antennas, ues
 
 
+def check_coord_files_mode(fichier_de_cas):
+    nom_du_fichier = ""
+    
+    coord_files_mode = get_from_dict("COORD_FILES", fichier_de_cas)
+    if coord_files_mode:
+        if 'read' in coord_files_mode.keys() and 'write' not in coord_files_mode.keys():
+            mode = True
+            nom_du_fichier = get_from_dict("read", fichier_de_cas)
+            return nom_du_fichier, mode
+            
+        elif 'write' in coord_files_mode.keys() and 'read' not in coord_files_mode.keys():
+            mode = False
+            nom_du_fichier = get_from_dict("write", fichier_de_cas)
+            return nom_du_fichier, mode
+            
+    else:
+        ERROR("La clé COORD_FILES n'est pas définie.")
+
 # Fonction lab1 requise, retourne une liste d'antenne et une liste d'UE
 # Prends en parametre data_case qui est le nom du fichier de cas
 def lab2 (data_case):
@@ -567,9 +585,10 @@ def lab2 (data_case):
     fichier_de_cas = data_case
     fichier_de_devices = read_yaml_file("device_db.yaml")
     # FAIRE VERIFICATION DE WRITE AVANT D'APPELER LES FONCTIONS D'ASSOCIATION DE COORDONNEES
-    get_from_dict("COORD_FILES",fichier_de_cas)
-    ues = assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices)
-    antennas = assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices)
+    coord_file_name, mode = check_coord_files_mode(fichier_de_cas)
+    if mode == False :
+        ues = assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices)
+        antennas = assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices)
     return (antennas,ues)
 
 # Fonction vérifiant si le fichier YAML fournit en input a la bonne structure 
