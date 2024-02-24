@@ -609,6 +609,9 @@ def check_coord_files_mode(fichier_de_cas):
         if 'read' in coord_files_mode.keys() and 'write' not in coord_files_mode.keys():
             mode = True
             nom_du_fichier = get_from_dict("read", fichier_de_cas)
+            # Vérifier l'existence du fichier
+            if not os.path.exists(nom_du_fichier):
+                ERROR(f"Le fichier {nom_du_fichier} n'existe pas.")
             return nom_du_fichier, mode
             
         elif 'write' in coord_files_mode.keys() and 'read' not in coord_files_mode.keys():
