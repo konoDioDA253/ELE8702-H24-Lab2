@@ -56,6 +56,7 @@ class Pathloss:
      def __init__(self, id_ue, id_ant):
         self.id_ue = id_ue   # ID de l'ue
         self.id_ant = id_ant # ID de l'antenne
+        self.los = None # LoS ou non (bool)
         self.value = None   # Valeur du pathloss
 
 # Fonction permettant d'afficher un message d'erreur et de stopper le programme
@@ -553,16 +554,47 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
           """)
     return 0
 
-
+def verifie_presence_visibility_los(ue, antenne):
+    with open('visibility_lab2_eq7.txt', 'r') as f:
+        for line in f:
+            ids = list(map(int, line.split()))
+            if ids[0] == ue and antenne in ids[1:]:
+                return False
+    return True
 
 # ****************************CHANGER POUR 3GPP**********************************
 # Fonction permettant d'assigner un pathloss à chaque combinaison (antenne,UE) du terrain
 def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
     pathloss_list =[]
     warning_log = ""
-    for ue in ues:
+    model = get_from_dict('model', fichier_de_cas)
+    if model == "3gpp" :
+     for ue in ues:
         for antenna in antennas:
             pathloss = Pathloss(ue.id, antenna.id)
+            pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
+            scenario = get_from_dict('scenario', fichier_de_cas)
+            if scenario == "RMa" :
+                pathloss_value, warning_message = rma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+                pathloss.value = pathloss_value
+                warning_log += warning_message
+                pathloss_list.append(pathloss)
+            
+
+    if model == "UMa" :
+            pathloss = Pathloss(ue.id, antenna.id)
+            pathloss_value, warning_message = uma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+            pathloss.value = pathloss_value
+    if model == "UMI" :
+            pathloss = Pathloss(ue.id, antenna.id)
+            pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+            pathloss.value = pathloss_value 
+
+    if model == "okumura" :
+     for ue in ues:
+        for antenna in antennas:
+            pathloss = Pathloss(ue.id, antenna.id)
+            pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
             pathloss_value, warning_message = okumura(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
             pathloss.value = pathloss_value
             warning_log += warning_message
