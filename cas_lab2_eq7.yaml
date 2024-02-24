@@ -8,8 +8,10 @@
 # En .yaml, pour désactiver un champs, le mettre comme commentaire
 ETUDE_PATHLOSS:
    PATHLOSS :
-       model : okumura #3gpp
-       scenario : urban_small #UMa
+       model : 3gpp
+       scenario : UMa
+      #  model : okumura
+      #  scenario : urban_small
    ANT_COORD_GEN : g
    UE_COORD_GEN: a
    COORD_FILES:  # Utilisé quand les coordonées sont lues à partir d'un fichier.
@@ -27,5 +29,5 @@ ETUDE_PATHLOSS:
    GEOMETRY:
       Surface:
          rectangle:
-           length : 25 # en kilomètres
-           height : 20
+           length : 7 # en kilomètres
+           height : 6

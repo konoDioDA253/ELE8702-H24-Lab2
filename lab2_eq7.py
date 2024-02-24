@@ -184,7 +184,7 @@ def read_yaml_file(fname):
     # Vérifier l'existence du fichier
     if not os.path.exists(fname):
         raise FileNotFoundError(f"Le fichier {fname} n'existe pas.")
-
+    print(f"INFO : Reading data in file '{fname}' in the current directory.")
     # Ouvrir et lire le fichier YAML
     with open(fname, 'r') as file:
         return yaml.safe_load(file)
@@ -281,7 +281,7 @@ def assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices):
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
 def lire_coordonnees_ues(filename):
     liste_ues_avec_coordonnees = []
-
+    print(f"INFO : Reading UEs data in file '{filename}' in the current directory.")
     # Ouvrir le fichier en mode lecture
     with open(filename, 'r') as f:
         # Lire chaque ligne du fichier
@@ -312,6 +312,7 @@ def lire_coordonnees_ues(filename):
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
 def lire_coordonnees_antennes(filename):
     liste_antennes_avec_coordonnees = []
+    print(f"INFO : Reading antennas data in file '{filename}' in the current directory.")
 
     # Ouvrir le fichier en mode lecture
     with open(filename, 'r') as f:
@@ -554,8 +555,12 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
           """)
     return 0
 
-def verifie_presence_visibility_los(ue, antenne):
-    with open('visibility_lab2_eq7.txt', 'r') as f:
+# Fonction permettant de vérifier si la combinaison ue antenne fournie en argument est en situation LoS ou non
+# Retourne True si la combinaison ue antenne est LoS
+# Retourne False sinon
+def verifie_presence_visibility_los(ue, antenne, fichier_de_cas):
+    visibility_filename = get_from_dict('read', get_from_dict('VISIBILITY', fichier_de_cas))
+    with open(visibility_filename, 'r') as f:
         for line in f:
             ids = list(map(int, line.split()))
             if ids[0] == ue and antenne in ids[1:]:
@@ -568,38 +573,72 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
     pathloss_list =[]
     warning_log = ""
     model = get_from_dict('model', fichier_de_cas)
+    scenario = get_from_dict('scenario', fichier_de_cas)
+    # (PROF) : Est-ce correct de stocker le los dans la class pathloss plutot que la class ue?
     if model == "3gpp" :
-     for ue in ues:
-        for antenna in antennas:
-            pathloss = Pathloss(ue.id, antenna.id)
-            pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
-            scenario = get_from_dict('scenario', fichier_de_cas)
-            if scenario == "RMa" :
-                pathloss_value, warning_message = rma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+        # if scenario == "RMa" :
+        #     for ue in ues:
+        #         for antenna in antennas:
+        #             pathloss = Pathloss(ue.id, antenna.id)
+        #             pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
+        #             if pathloss.los == True :
+        #                 pathloss_value, warning_message = rma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+        #             if pathloss.los == False :
+        #                 pathloss_value, warning_message = rma_nlos(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+        #             pathloss.value = pathloss_value
+        #             warning_log += warning_message
+        #             pathloss_list.append(pathloss)
+        #     return pathloss_list, warning_log
+        if scenario == "UMa" :
+            for ue in ues:
+                for antenna in antennas:
+                    pathloss = Pathloss(ue.id, antenna.id)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                    if pathloss.los == True :
+                        pathloss_value, warning_message = uma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+                    if pathloss.los == False :
+                        pathloss_value, warning_message = uma_nlos(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+                    pathloss.value = pathloss_value
+                    warning_log += warning_message
+                    pathloss_list.append(pathloss)
+            return pathloss_list, warning_log
+        # if scenario == "UMi" :
+        #     for ue in ues:
+        #         for antenna in antennas:
+        #             pathloss = Pathloss(ue.id, antenna.id)
+        #             pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
+        #             if pathloss.los == True :
+        #                 pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+        #             if pathloss.los == False :
+        #                 pathloss_value, warning_message = umi_nlos(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+        #             pathloss.value = pathloss_value
+        #             warning_log += warning_message
+        #             pathloss_list.append(pathloss)
+        #     return pathloss_list, warning_log
+        # Si aucun nom de scenario 3GPP n'est reconnu :
+        ERROR("""Non de scenario invalide dans le fichier de cas.
+                SVP, entrer un scenario conforme dans le fichier de cas YAML parmi les propositions suivantes (model, scenario) :
+           (model : 3gpp, scenario : RMa)
+           (model : 3gpp, scenario : UMa)
+           (model : 3gpp, scenario : UMi)
+            """)
+    if model == "okumura" :
+        for ue in ues:
+            for antenna in antennas:
+                pathloss = Pathloss(ue.id, antenna.id)
+                pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                pathloss_value, warning_message = okumura(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                 pathloss.value = pathloss_value
                 warning_log += warning_message
                 pathloss_list.append(pathloss)
-            
+        return pathloss_list, warning_log
 
-    if model == "UMa" :
-            pathloss = Pathloss(ue.id, antenna.id)
-            pathloss_value, warning_message = uma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
-            pathloss.value = pathloss_value
-    if model == "UMI" :
-            pathloss = Pathloss(ue.id, antenna.id)
-            pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
-            pathloss.value = pathloss_value 
-
-    if model == "okumura" :
-     for ue in ues:
-        for antenna in antennas:
-            pathloss = Pathloss(ue.id, antenna.id)
-            pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
-            pathloss_value, warning_message = okumura(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
-            pathloss.value = pathloss_value
-            warning_log += warning_message
-            pathloss_list.append(pathloss)
-    return pathloss_list, warning_log
+    # Si aucun nom de modele n'est reconnu :
+    ERROR("""Non de modele invalide dans le fichier de cas.
+            SVP, entrer un model conforme dans le fichier de cas YAML parmi les propositions suivantes (model) :
+           (model : 3gpp)
+           (model : okumura)
+          """)
 # ********************************************************************************
 
 
