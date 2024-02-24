@@ -282,7 +282,7 @@ def lire_coordonnees_ues(filename):
     liste_ues_avec_coordonnees = []
 
     # Ouvrir le fichier en mode lecture
-    with open(fichier, 'r') as f:
+    with open(filename, 'r') as f:
         # Lire chaque ligne du fichier
         for ligne in f:
             # Vérifier si la ligne commence par "ue"
@@ -313,7 +313,7 @@ def lire_coordonnees_antennes(filename):
     liste_antennes_avec_coordonnees = []
 
     # Ouvrir le fichier en mode lecture
-    with open(fichier, 'r') as f:
+    with open(filename, 'r') as f:
         # Lire chaque ligne du fichier
         for ligne in f:
             # Vérifier si la ligne commence par "antenna"
@@ -346,30 +346,22 @@ def write_to_file(filename, log_message):
     print(f"INFO : Wrote file '{filename}' in the current directory.")
 
 
-
-
-
-
-# ***********APPELER SEULEEMENT DANS LE CAS D'UN WRITE**************
 # Fonction qui ecrit les information par rapport aux coordonnees des antennes et au UEs dans le fichier de sortie specifiee
-def write_coordinates_to_file(antennas, ues, coord_file_name):
-    filename = coord_file_name
-    with open(filename, 'w') as file:
-        for antenna in antennas:
-            line = f"antenna\t{antenna.id}\t{antenna.group}\t{antenna.coords[0]}\t{antenna.coords[1]}\n"
-            file.write(line)
+def write_coordinates_to_file(antennas, ues, fichier_de_cas):
+    coord_file_name, mode = check_coord_files_mode(fichier_de_cas)
+    if mode == 0 :
 
-        for ue in ues:
-            line = f"ue\t{ue.id}\t{ue.group}\t{ue.coords[0]}\t{ue.coords[1]}\t{ue.app}\n"
-            file.write(line)
-    print(f"INFO : Wrote file '{filename}' in the current directory.")
-# ******************************************************************
+        with open(coord_file_name, 'w') as file:
+            for antenna in antennas:
+                line = f"antenna\t{antenna.id}\t{antenna.group}\t{antenna.coords[0]}\t{antenna.coords[1]}\n"
+                file.write(line)
 
-
-
-
-
-
+            for ue in ues:
+                line = f"ue\t{ue.id}\t{ue.group}\t{ue.coords[0]}\t{ue.coords[1]}\t{ue.app}\n"
+                file.write(line)
+        print(f"INFO : Wrote file '{coord_file_name}' in the current directory.")
+    else :
+        return
 
 # Fonction qui écrire dans un fichier la valeurs des pathlosses calculer, l'id de l'ue et des antennes associés et le senario utilisé et le model
 def write_pathloss_to_file(pathlosses, fichier_de_cas):
@@ -825,8 +817,7 @@ def main(arg):
     antennas, ues = association_ue_antenne(pathlosses, antennas, ues)
 
     # Ecriture des fichiers de sortie et du plot des equipements
-    coord_file_name = get_from_dict("write", fichier_de_cas)
-    write_coordinates_to_file(antennas,ues, coord_file_name)
+    write_coordinates_to_file(antennas,ues, fichier_de_cas)
     write_pathloss_to_file(pathlosses, fichier_de_cas)
     write_assoc_ues_to_file(antennas)
     write_assoc_ant_to_file(ues)

@@ -16,7 +16,7 @@ ETUDE_PATHLOSS:
       # read: coords_lab2_eq7.txt # actif quand on lis le fichier de coordonnées
       write: coords_lab2_eq7.txt   # actif quand on veut écrire les résultats dans un fichier
    DEVICES:
-      Antenna1 : # Group Antenna1 (comme défini dans la base de données)
+      Antenna4 : # Group Antenna1 (comme défini dans la base de données)
          number : 25
       UE1-App1 : # Group UE1-App1 (comme défini dans la base de données)
          number : 30
