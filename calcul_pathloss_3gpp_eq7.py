@@ -38,24 +38,148 @@ def get_from_dict_3GPP(key, data, res=None, curr_level = 1, min_level = 1):
     return res 
 
 
-# # -------------------------------------------------
-# #     RMa LOS ET nlOS
-# # -------------------------------------------------
 
-# def _rma_nlosp(d_2D, d_Bp, h_Bs, H_UT, W, h):
-#     if  d_2D>= && d_2D <= dB
-#     PL_RMa = PL1
+
+
+
+
+
+
+# ************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+#     RMa LOS ET nlOS
+# ************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+
+# Cas RMA LOS
+def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     
-#     return 
+    # Definition des fonctions
+    def valeur_minimum(val1, val2):
+        if val1 < val2:
+            val = val1
+        if val1 >= val2:
+            val = val2
+        return val
 
-# def rma_los():
+    def _rma_los_pl1(distance_3D_m, frequence_GHz, hauteur_standard_m):
+        min1 = valeur_minimum(0.03*pow(hauteur_standard_m, 1.72), 10)
+        min2 = valeur_minimum(0.044*pow(hauteur_standard_m, 1.72), 14.77)
+        pl = 20*math.log10(40*math.pi*distance_3D_m*frequence_GHz/3) + min1 - min2 + 0.002*math.log10(hauteur_standard_m)*distance_3D_m
+        return pl
 
-#     return 
+    def _rma_los_pl2(distance_3D_m, frequence_GHz, hauteur_standard_m, distance_BP_m):
+        pl1 = _rma_los_pl1(distance_BP_m, frequence_GHz, hauteur_standard_m)
+        pl = pl1 + 40*math.log10(distance_3D_m/distance_BP_m)
+        return pl
+    
+    # Definition des variables
+    c = 3e8
+    antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
+    ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
+    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_m = 1000*distance_2D_km
+    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
+    frequence_Hz = 1000000000*frequence_GHz
+    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
+    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
+    hauteur_standard_m = 5 # corresponds a la hauteur de batiment moyenne, 5m par defaut
+
+    distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
+    distance_BP_km = distance_BP_m/1000
+
+    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
+    distance_3D_km = distance_3D_m/1000
+
+    # Calcul de pathloss
+    warning_message = ""
+    if 10 < distance_2D_m and distance_2D_m < distance_BP_m :
+        pathloss = _rma_los_pl1(distance_3D_m, frequence_GHz, hauteur_standard_m)
+    if distance_BP_km < distance_2D_km and distance_2D_km < 10 :
+        pathloss = _rma_los_pl2(distance_3D_m, frequence_GHz, hauteur_standard_m, distance_BP_m)
+    if distance_2D_m < 10 :
+        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
+        pathloss = 0
+    if 10 < distance_2D_km :
+        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 10 km.
+Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
+        pathloss = 1000000000000000000000000000000000000000000
+    return pathloss, warning_message
+
+# Cas RMA NLOS
+def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues) :
+    
+    # Definition des fonctions
+    def max_comparator(pl_los, pl_nlosp, warning_message_rma_los, warning_message_rma_nlosp):
+        if pl_los < pl_nlosp :
+            pl = pl_nlosp
+            warning_message = warning_message_rma_nlosp
+        if pl_los >= pl_nlosp :
+            pl = pl_los
+            warning_message = warning_message_rma_los
+        return pl, warning_message
+    
+    # Definition des variables
+    c = 3e8
+    antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
+    ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
+    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_m = 1000*distance_2D_km
+    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
+    frequence_Hz = 1000000000*frequence_GHz
+    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
+    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
+    hauteur_standard_m = 5 # corresponds a la hauteur de batiment moyenne, 5m par defaut
+    largeur_standard_m = 20 # correspond a la largeur moyenne des rues, 20m par defaut
+
+    distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
+    distance_BP_km = distance_BP_m/1000
+
+    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
+    distance_3D_km = distance_3D_m/1000
+    
+    
+    # Calcul de pathloss
+    if 10 < distance_2D_m and distance_2D_km < 5 :
+        warning_message_rma_los = ""
+        warning_message_rma_nlosp = ""
+        pl_rma_los, warning_message_rma_los = rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
+        pl_rma_nlosp = 161.04 - 7.1*math.log10(largeur_standard_m) + 7.5*math.log10(hauteur_standard_m) - (24.37 - 3.7*(hauteur_standard_m/hauteur_BS_m)**2)*math.log10(hauteur_BS_m) + (43.42 - 3.1*math.log10(hauteur_BS_m))*(math.log10(distance_3D_m) - 3) + 20*math.log10(frequence_GHz) - (3.2*(math.log10(11.75*hauteur_UT_m))**2 - 4.97)
+        pathloss, warning_message = max_comparator(pl_rma_los, pl_rma_nlosp, warning_message_rma_los, warning_message_rma_nlosp)
+    if distance_2D_m < 10  :
+        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
+        pathloss = 0
+    if 5 < distance_2D_km :
+        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
+Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
+        pathloss = 1000000000000000000000000000000000000000000
+    return pathloss, warning_message
 
 
-# -------------------------------------------------
-#     UMa LOS ET nLOS
-# -------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+#     UMa LOS ET nlOS
+# ************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 
 def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     
@@ -156,9 +280,9 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
 
 
 
-# # -------------------------------------------------
-# #     UMI  LOS ET nLOS
-# # -------------------------------------------------
+# ************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+#     UMi LOS ET nlOS
+# ************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
 
 # def umi_los():
 #     d_2D, d_Bp, h_UT, H_BS,

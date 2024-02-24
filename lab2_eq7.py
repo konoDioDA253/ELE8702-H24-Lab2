@@ -576,19 +576,19 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
     scenario = get_from_dict('scenario', fichier_de_cas)
     # (PROF) : Est-ce correct de stocker le los dans la class pathloss plutot que la class ue?
     if model == "3gpp" :
-        # if scenario == "RMa" :
-        #     for ue in ues:
-        #         for antenna in antennas:
-        #             pathloss = Pathloss(ue.id, antenna.id)
-        #             pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
-        #             if pathloss.los == True :
-        #                 pathloss_value, warning_message = rma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
-        #             if pathloss.los == False :
-        #                 pathloss_value, warning_message = rma_nlos(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
-        #             pathloss.value = pathloss_value
-        #             warning_log += warning_message
-        #             pathloss_list.append(pathloss)
-        #     return pathloss_list, warning_log
+        if scenario == "RMa" :
+            for ue in ues:
+                for antenna in antennas:
+                    pathloss = Pathloss(ue.id, antenna.id)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                    if pathloss.los == True :
+                        pathloss_value, warning_message = rma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+                    if pathloss.los == False :
+                        pathloss_value, warning_message = rma_nlos(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+                    pathloss.value = pathloss_value
+                    warning_log += warning_message
+                    pathloss_list.append(pathloss)
+            return pathloss_list, warning_log
         if scenario == "UMa" :
             for ue in ues:
                 for antenna in antennas:
@@ -606,7 +606,7 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
         #     for ue in ues:
         #         for antenna in antennas:
         #             pathloss = Pathloss(ue.id, antenna.id)
-        #             pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id)
+        #             pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
         #             if pathloss.los == True :
         #                 pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
         #             if pathloss.los == False :
