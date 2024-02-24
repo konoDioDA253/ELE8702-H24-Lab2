@@ -15,6 +15,14 @@ def calculate_distance_3GPP(coord1, coord2):
     x2, y2 = coord2
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
+# Fonction permettant d'afficher un message d'erreur et de stopper le programme
+def ERROR_3GPP(msg , code = 1):
+    print("\n\n\nERROR\nPROGRAM STOPPED!!!\n")
+    if msg:
+        print(msg)
+    print(f"\n\texit code = {code}\n\n\t\n")
+    sys.exit(code)
+
 # Fonction permettant de trouver la valeur d'une cle dans un fichier YAML
 def get_from_dict_3GPP(key, data, res=None, curr_level = 1, min_level = 1):
     """Fonction qui retourne la valeur de n'importe quel clé du dictionnaire
@@ -25,7 +33,7 @@ def get_from_dict_3GPP(key, data, res=None, curr_level = 1, min_level = 1):
         return res
     if type(data) is not dict:
         msg = f"get_from_dict_3GPP() works with dicts and is receiving a {type(data)}"
-        ERROR(msg, 1)
+        ERROR_3GPP(msg, 1)
     else:
         # data IS a dictionary
         for k, v in data.items():
