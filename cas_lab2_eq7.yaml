@@ -1,0 +1,31 @@
+###############################################
+#                                             #
+#         Cas 9:                              #
+#            File: cas9.yaml                  #
+#            Description: Etude pathloss 3gpp #
+#                                             #
+###############################################
+# En .yaml, pour désactiver un champs, le mettre comme commentaire
+ETUDE_PATHLOSS:
+   PATHLOSS :
+       model : okumura #3gpp
+       scenario : urban_small #UMa
+   ANT_COORD_GEN : g
+   UE_COORD_GEN: a
+   COORD_FILES:  # Utilisé quand les coordonées sont lues à partir d'un fichier.
+      # read: coords_lab2_eq7.txt # actif quand on lis le fichier de coordonnées
+      write: coords_lab2_eq7.txt   # actif quand on veut écrire les résultats dans un fichier
+   DEVICES:
+      Antenna1 : # Group Antenna1 (comme défini dans la base de données)
+         number : 25
+      UE1-App1 : # Group UE1-App1 (comme défini dans la base de données)
+         number : 30
+      UE2-App2 : # Group UE2-App2 (comme défini dans la base de données)
+         number: 20
+   VISIBILITY : # read nlos information
+      read: visibility_lab2_eq7.txt 
+   GEOMETRY:
+      Surface:
+         rectangle:
+           length : 25 # en kilomètres
+           heigth : 20
