@@ -24,6 +24,8 @@ ETUDE_PATHLOSS:
          number : 30
       UE2-App2 : # Group UE2-App2 (comme défini dans la base de données)
          number: 20
+      UE6-App6 : # Group UE6-App6 (comme défini dans la base de données)
+         number: 10
    VISIBILITY : # read nlos information
       read: visibility_lab2_eq7.txt 
    GEOMETRY:

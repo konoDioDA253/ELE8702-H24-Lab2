@@ -91,7 +91,7 @@ def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
     hauteur_standard_m = 5 # corresponds a la hauteur de batiment moyenne, 5m par defaut
 
-    distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
+    distance_BP_m = 2* math.pi * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
     distance_BP_km = distance_BP_m/1000
 
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)

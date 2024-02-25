@@ -68,3 +68,9 @@ UES:
     name: UE2-App2
     app: app2
     height:  1.5
+
+  UE6-App6:
+    type: ue
+    name: UE6-App6
+    app: app6
+    height:  2

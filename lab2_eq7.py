@@ -848,12 +848,14 @@ def sanity_check_dimensions(fichier_de_cas):
 
 # Fonction vérifiant si le programme doit fournir un fichier log des warnings du calcul des pathloss
 # Si des warning concernant le calcul des pathloss sont apparus, ils se retrouvent dans ce fichier
-def write_pathloss_warning_log_file(warning_log, filename):
+def write_pathloss_warning_log_file(warning_log, filename, fichier_de_cas):
     if warning_log == "":
         print("Aucun problem lors du calcul des pathloss!")
     else:
         write_to_file(filename, warning_log)
-        print(f"WARNING : During the pathloss calculation, some pathloss values had distances that did not meet the conditions of the Okumura model. Please find more details in the file '{filename}'.")
+        count = warning_log.count("WARNING")
+        model = get_from_dict('model', fichier_de_cas)
+        print(f"WARNING : During the pathloss calculation, a total of {count} pathloss values had distances that did not meet the conditions of the {model} model. Please find more details in the file '{filename}'.")
 
 
 # Fonction main du programme (requise), elle appelle les autres fonctions du programme
@@ -896,7 +898,7 @@ def main(arg):
     write_assoc_ues_to_file(antennas)
     write_assoc_ant_to_file(ues)
     plot_equipment_positions(antennas, ues)
-    write_pathloss_warning_log_file(warning_log, "pathloss_warning_log.txt")
+    write_pathloss_warning_log_file(warning_log, "pathloss_warning_log.txt", fichier_de_cas)
 
 
 
