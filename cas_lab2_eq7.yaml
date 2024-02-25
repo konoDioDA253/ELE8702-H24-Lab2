@@ -15,8 +15,8 @@ ETUDE_PATHLOSS:
    ANT_COORD_GEN : g
    UE_COORD_GEN: a
    COORD_FILES:  # Utilisé quand les coordonées sont lues à partir d'un fichier.
-      # read: coords_lab2_eq7.txt # actif quand on lis le fichier de coordonnées
-       write: coords_lab2_eq7.txt   # actif quand on veut écrire les résultats dans un fichier
+      read: coords_lab2_eq7.txt # actif quand on lis le fichier de coordonnées
+      #  write: coords_lab2_eq7.txt   # actif quand on veut écrire les résultats dans un fichier
    DEVICES:
       Antenna4 : # Group Antenna1 (comme défini dans la base de données)
          number : 25

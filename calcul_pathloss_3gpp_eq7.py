@@ -197,7 +197,7 @@ def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         return pl
 
     def _uma_los_pl2(distance_3D_m, frequence_GHz, distance_BP_m, hauteur_BS_m, hauteur_UT_m):
-        pl = 28.0 + 40*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz) - 9*math.log10(distance_BP_m**2 - (hauteur_BS_m - hauteur_UT_m)**2) 
+        pl = 28.0 + 40*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz) - 9*math.log10(distance_BP_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) 
         return pl
     
     # Definition des variables
@@ -317,12 +317,12 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
 def umi_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     
     # Definition des fonctions
-    def _umi_los_pl1(distance_3D_m, frequence_Hz):
-        pl = 32.4 + 21*math.log10(distance_3D_m) + 20*math.log10(frequence_Hz)
+    def _umi_los_pl1(distance_3D_m, frequence_GHz):
+        pl = 32.4 + 21*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz)
         return pl
 
-    def _umi_los_pl2(distance_3D_m, frequence_Hz, distance_BP_m, hauteur_BS_m, hauteur_UT_m):
-        pl = 32.4 + 40*math.log10(distance_3D_m) + 20*math.log10(frequence_Hz) - 9.5*math.log10(distance_BP_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) 
+    def _umi_los_pl2(distance_3D_m, frequence_GHz, distance_BP_m, hauteur_BS_m, hauteur_UT_m):
+        pl = 32.4 + 40*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz) - 9.5*math.log10(distance_BP_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) 
         return pl
     
     # Definition des variables
@@ -349,7 +349,7 @@ def umi_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     # Calcul de pathloss
     warning_message = ""
     if 10 < distance_2D_m and distance_2D_m < distance_prime_BP_m :
-        pathloss = _umi_los_pl1(distance_3D_m, frequence_Hz)
+        pathloss = _umi_los_pl1(distance_3D_m, frequence_GHz)
     if distance_prime_BP_m < distance_2D_m and distance_2D_km < 5 :
         pathloss = _umi_los_pl2(distance_3D_m, frequence_GHz, distance_prime_BP_m, hauteur_BS_m, hauteur_UT_m)
     if distance_2D_m < 10 :
@@ -402,7 +402,7 @@ def umi_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
         warning_message_umi_los = ""
         warning_message_umi_nlosp = ""
         pl_umi_los, warning_message_umi_los = umi_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
-        pl_umi_nlosp = 35.3*math.log10(distance_3D_m) + 22.4 + 21.3*math.log10(frequence_Hz) - 0.3*(hauteur_UT_m - 1.5)
+        pl_umi_nlosp = 35.3*math.log10(distance_3D_m) + 22.4 + 21.3*math.log10(frequence_GHz) - 0.3*(hauteur_UT_m - 1.5)
         pathloss, warning_message = max_comparator(pl_umi_los, pl_umi_nlosp, warning_message_umi_los, warning_message_umi_nlosp)
     if distance_2D_m < 10  :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
