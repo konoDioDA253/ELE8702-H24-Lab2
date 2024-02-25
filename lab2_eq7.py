@@ -183,7 +183,7 @@ def read_yaml_file(fname):
     
     # Vérifier l'existence du fichier
     if not os.path.exists(fname):
-        raise FileNotFoundError(f"Le fichier {fname} n'existe pas.")
+        ERROR(f"Le fichier {fname} n'existe pas.")
     print(f"INFO : Reading data in file '{fname}' in the current directory.")
     # Ouvrir et lire le fichier YAML
     with open(fname, 'r') as file:
@@ -555,11 +555,53 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
           """)
     return 0
 
+# Fonction permettant de verifier l'integrite du fichier de visibilite fourni par l'utilisateur a travers le fichier de cas
+def sanity_check_visibility_file(filename, nombre_ue):
+    # Vérifier si le fichier existe 
+    if not os.path.exists(filename):
+        ERROR(f"Le fichier '{filename}' n'existe pas dans le repertoire courant.")
+    
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+        # Vérifier s'il y a des lignes vides
+        if any(line.strip() == '' for line in lines):
+            ERROR(f"Le fichier '{filename}' contient des lignes vides.")
+
+        # Vérifier le bon nombre de colonnes et l'absence de répétitions de chiffres
+        first_digits_set = set()
+        for line in lines:
+            ue_numbers = line.strip().split()
+            if len(ue_numbers) != len(set(ue_numbers)):
+                ERROR(f"Il y a des répétitions de id d'antenne dans une ligne du fichier '{filename}'.")
+
+            if len(ue_numbers) < 2:
+                ERROR(f"Chaque ligne du fichier '{filename}' doit contenir au moins deux chiffres (UE et antenne).")
+
+            # Vérifier si le premier chiffre est différent des précédents
+            first_digit = ue_numbers[0]
+            if first_digit in first_digits_set:
+                ERROR(f"""Le premier chiffre de la ligne du fichier '{filename}' est en double : {first_digit}.
+                Le premier chiffre d'une ligne represente une UE et ne peut donc pas se retrouver sur une autre ligne.""")
+            first_digits_set.add(first_digit)
+
+        # Vérifier le nombre de lignes
+        ue_count = len(lines)
+        min_ue_count = 0.05 * nombre_ue
+        max_ue_count = 0.30 * nombre_ue
+        if ue_count < min_ue_count or ue_count > max_ue_count:
+            ERROR(f"""Le nombre de lignes ({ue_count}) dans le fichier '{filename}' n'est pas compris entre 5% et 30% du nombre d'UE spécifié ({nombre_ue}).
+            SVP, mettre un nombre de ligne entre {min_ue_count} et {max_ue_count} dans le fichier '{filename}'.""")
+
+
+
+
 # Fonction permettant de vérifier si la combinaison ue antenne fournie en argument est en situation LoS ou non
 # Retourne True si la combinaison ue antenne est LoS
 # Retourne False sinon
-def verifie_presence_visibility_los(ue, antenne, fichier_de_cas):
+def verifie_presence_visibility_los(ue, antenne, fichier_de_cas, ues):
     visibility_filename = get_from_dict('read', get_from_dict('VISIBILITY', fichier_de_cas))
+    sanity_check_visibility_file(visibility_filename, len(ues))
     with open(visibility_filename, 'r') as f:
         for line in f:
             ids = list(map(int, line.split()))
@@ -580,7 +622,7 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
             for ue in ues:
                 for antenna in antennas:
                     pathloss = Pathloss(ue.id, antenna.id)
-                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
                     if pathloss.los == True :
                         pathloss_value, warning_message = rma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                     if pathloss.los == False :
@@ -593,7 +635,7 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
             for ue in ues:
                 for antenna in antennas:
                     pathloss = Pathloss(ue.id, antenna.id)
-                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
                     if pathloss.los == True :
                         pathloss_value, warning_message = uma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                     if pathloss.los == False :
@@ -606,7 +648,7 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
             for ue in ues:
                 for antenna in antennas:
                     pathloss = Pathloss(ue.id, antenna.id)
-                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
                     if pathloss.los == True :
                         pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                     if pathloss.los == False :
@@ -626,7 +668,7 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
         for ue in ues:
             for antenna in antennas:
                 pathloss = Pathloss(ue.id, antenna.id)
-                pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
                 pathloss_value, warning_message = okumura(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                 pathloss.value = pathloss_value
                 warning_log += warning_message
@@ -671,7 +713,7 @@ def association_ue_antenne(pathlosses, antennas, ues):
 
     return antennas, ues
 
-
+# Fonction retournant si nous sommes en mode de lecture ou d'ecriture
 def check_coord_files_mode(fichier_de_cas):
     nom_du_fichier = ""
     
@@ -680,9 +722,6 @@ def check_coord_files_mode(fichier_de_cas):
         if 'read' in coord_files_mode.keys() and 'write' not in coord_files_mode.keys():
             mode = True
             nom_du_fichier = get_from_dict("read", fichier_de_cas)
-            # Vérifier l'existence du fichier
-            if not os.path.exists(nom_du_fichier):
-                ERROR(f"Le fichier {nom_du_fichier} n'existe pas.")
             return nom_du_fichier, mode
             
         elif 'write' in coord_files_mode.keys() and 'read' not in coord_files_mode.keys():
@@ -692,6 +731,48 @@ def check_coord_files_mode(fichier_de_cas):
             
     else:
         ERROR("La clé COORD_FILES n'est pas définie.")
+
+# Fonction permettant de verifier l'integritee du fichier de coordonnee fourni en entree au moment de sa lecture
+def sanity_check_coordinates_file(filename):
+    if not os.path.exists(filename):
+        ERROR(f"Le fichier {filename} n'existe pas dans le repertoire courant.")
+    
+    
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+        id_antenna = -1
+        id_ue = -1
+
+        for line in lines:
+            # Vérifier s'il y a des lignes vides
+            if line.strip() == '':
+                ERROR(f"Le fichier '{filename}' contient des lignes vides.")
+
+            # Vérifier le nombre de colonnes
+            parts = line.strip().split()
+            if parts[0] == 'antenna':
+                # Vérifier le format des lignes antenna
+                if len(parts) != 5:
+                    ERROR(f"Le format de la ligne antenna dans le fichier '{filename}' est incorrect. Il doit y avoir 5 colonnes : string chiffre string chiffre chiffre")
+                # Vérifier si l'identifiant est incrémenté correctement
+                current_id = int(parts[1])
+                if current_id != id_antenna + 1:
+                    ERROR(f"""L'identifiant de l'antenne dans le fichier '{filename}' n'est pas incrémenté correctement: {line.strip()}.
+                    Se rappeler que l'id doit commencer a 0 et doit s'incrementer un a un par la suite.""")
+                id_antenna = current_id
+            elif parts[0] == 'ue':
+                # Vérifier le format des lignes ue
+                if len(parts) != 6:
+                    ERROR(f"Le format de la ligne ue dans le fichier '{filename}' est incorrect. Il doit y avoir 6 colonnes : string chiffre string chiffre chiffre string")
+                # Vérifier si l'identifiant est incrémenté correctement
+                current_id = int(parts[1])
+                if current_id != id_ue + 1:
+                    ERROR(f"""L'identifiant de l'UE dans le fichier '{filename}' n'est pas incrémenté correctement: {line.strip()}. 
+                    Se rappeler que l'id doit commencer a 0 et doit s'incrementer un a un par la suite.""")
+                id_ue = current_id
+            else:
+                ERROR(f"La première colonne de la ligne n'est ni 'antenna' ni 'ue': {line.strip()} dans le fichier '{filename}'.")
 
 # Fonction lab1 requise, retourne une liste d'antenne et une liste d'UE
 # Prends en parametre data_case qui est le nom du fichier de cas
@@ -709,12 +790,12 @@ def lab2 (data_case):
     # CETTE FONCTION EST OBLIGATOIRE
     fichier_de_cas = data_case
     fichier_de_devices = read_yaml_file("device_db.yaml")
-    # FAIRE VERIFICATION DE WRITE AVANT D'APPELER LES FONCTIONS D'ASSOCIATION DE COORDONNEES
     coord_file_name, mode = check_coord_files_mode(fichier_de_cas)
     if mode == False :
         ues = assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices)
         antennas = assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices)
     if mode == True :
+        sanity_check_coordinates_file(coord_file_name)        
         ues = lire_coordonnees_ues(coord_file_name)
         antennas = lire_coordonnees_antennes(coord_file_name)
     return (antennas,ues)
