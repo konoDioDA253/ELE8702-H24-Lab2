@@ -9,7 +9,7 @@
 ETUDE_PATHLOSS:
    PATHLOSS :
        model : 3gpp
-       scenario : RMa
+       scenario : UMa
       #  model : okumura
       #  scenario : urban_small
    ANT_COORD_GEN : g

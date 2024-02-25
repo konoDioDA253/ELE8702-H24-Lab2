@@ -1,7 +1,7 @@
 ### Calcul du pathloss avecv les formules 3GPP
 # On considere seulement les scenario RMa, UMa et UMi
 import math
-
+import sys
 # Fonction donnant le group et les coords a partir du ID d'un objet dans une liste du meme objet
 def get_group_and_coords_by_id_3GPP(object_list, target_id):
     for object in object_list:
@@ -45,6 +45,11 @@ def get_from_dict_3GPP(key, data, res=None, curr_level = 1, min_level = 1):
                 res = get_from_dict_3GPP(key, v, res, level, min_level)
     return res 
 
+
+def check_range(value, range1, range2):
+    if value < range1 or value > range2:
+        ERROR_3GPP(f"""La valeur {value}m est en dehors de l'intervalle [{range1}, {range2}].
+Nous ne pouvons pas appliquer les formules de calcul du pathloss 3GPP.""")
 
 
 
@@ -91,11 +96,18 @@ def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
     hauteur_standard_m = 5 # corresponds a la hauteur de batiment moyenne, 5m par defaut
 
+
+
     distance_BP_m = 2* math.pi * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
     distance_BP_km = distance_BP_m/1000
 
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
     distance_3D_km = distance_3D_m/1000
+    
+    # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
+    check_range(hauteur_BS_m, 10, 150)
+    check_range(hauteur_UT_m, 1, 10)
+    check_range(hauteur_standard_m, 5, 50)
 
     # Calcul de pathloss
     warning_message = ""
@@ -145,7 +157,12 @@ def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
     distance_3D_km = distance_3D_m/1000
     
-    
+    # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
+    check_range(hauteur_BS_m, 10, 150)
+    check_range(hauteur_UT_m, 1, 10)
+    check_range(hauteur_standard_m, 5, 50)
+    check_range(largeur_standard_m, 5, 50)
+
     # Calcul de pathloss
     if 10 < distance_2D_m and distance_2D_km < 5 :
         warning_message_rma_los = ""
@@ -217,6 +234,9 @@ def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
     distance_3D_km = distance_3D_m/1000
 
+    # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
+    check_range(hauteur_UT_m, 1.5, 22.5)
+
     # Calcul de pathloss
     warning_message = ""
     if 10 < distance_2D_m and distance_2D_m < distance_BP_m :
@@ -263,7 +283,9 @@ def uma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     distance_3D_km = distance_3D_m/1000
     
     
-    
+    # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
+    check_range(hauteur_UT_m, 1.5, 22.5)
+
     # Calcul de pathloss
     if 10 < distance_2D_m and distance_2D_km < 5 :
         warning_message_uma_los = ""
@@ -346,6 +368,9 @@ def umi_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
     distance_3D_km = distance_3D_m/1000
 
+    # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
+    check_range(hauteur_UT_m, 1.5, 22.5)
+
     # Calcul de pathloss
     warning_message = ""
     if 10 < distance_2D_m and distance_2D_m < distance_prime_BP_m :
@@ -395,7 +420,8 @@ def umi_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
     distance_3D_km = distance_3D_m/1000
     
-    
+    # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
+    check_range(hauteur_UT_m, 1.5, 22.5)
     
     # Calcul de pathloss
     if 10 < distance_2D_m and distance_2D_km < 5 :
