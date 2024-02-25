@@ -602,19 +602,19 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
                     warning_log += warning_message
                     pathloss_list.append(pathloss)
             return pathloss_list, warning_log
-        # if scenario == "UMi" :
-        #     for ue in ues:
-        #         for antenna in antennas:
-        #             pathloss = Pathloss(ue.id, antenna.id)
-        #             pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
-        #             if pathloss.los == True :
-        #                 pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
-        #             if pathloss.los == False :
-        #                 pathloss_value, warning_message = umi_nlos(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
-        #             pathloss.value = pathloss_value
-        #             warning_log += warning_message
-        #             pathloss_list.append(pathloss)
-        #     return pathloss_list, warning_log
+        if scenario == "UMi" :
+            for ue in ues:
+                for antenna in antennas:
+                    pathloss = Pathloss(ue.id, antenna.id)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas)
+                    if pathloss.los == True :
+                        pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+                    if pathloss.los == False :
+                        pathloss_value, warning_message = umi_nlos(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
+                    pathloss.value = pathloss_value
+                    warning_log += warning_message
+                    pathloss_list.append(pathloss)
+            return pathloss_list, warning_log
         # Si aucun nom de scenario 3GPP n'est reconnu :
         ERROR("""Non de scenario invalide dans le fichier de cas.
                 SVP, entrer un scenario conforme dans le fichier de cas YAML parmi les propositions suivantes (model, scenario) :
