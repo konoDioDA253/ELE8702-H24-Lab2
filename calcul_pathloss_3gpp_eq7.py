@@ -139,7 +139,7 @@ def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     hauteur_standard_m = 5 # corresponds a la hauteur de batiment moyenne, 5m par defaut
     largeur_standard_m = 20 # correspond a la largeur moyenne des rues, 20m par defaut
 
-    distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
+    distance_BP_m = 2* math.pi * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
     distance_BP_km = distance_BP_m/1000
 
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
