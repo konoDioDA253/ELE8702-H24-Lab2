@@ -416,27 +416,27 @@ def verify_okumura_conditions(fc,ht,hr, antenna_group, ue_group):
     if fc > 1500 :
         ERROR(f"""La fréquence {fc} MHz du groupe d'antenne '{antenna_group}' introduite dans le fichier de cas YAML est plus grande que 1.5 GHz. 
 Le model okumura ne s'applique pas. 
-Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'frequency' du groupe {antenna_group} dans le fichier device_db.yaml""")
+Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'frequency' du groupe {antenna_group} dans le fichier devices_db.yaml""")
     if fc < 150 :
         ERROR(f"""La fréquence {fc} MHz du groupe d'antenne '{antenna_group}' introduite dans le fichier de cas YAML est plus petite que 0.15 GHz.
 Le model okumura ne s'applique pas. 
-Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'frequency' du groupe {antenna_group} dans le fichier device_db.yaml""")
+Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'frequency' du groupe {antenna_group} dans le fichier devices_db.yaml""")
     if ht > 300 :
         ERROR(f"""La hauteur {ht} metres du groupe d'antenne '{antenna_group}' introduite dans le fichier de cas YAML est plus grande que 300 metres. 
 Le model okumura ne s'applique pas. 
-Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {antenna_group} dans le fichier device_db.yaml""")
+Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {antenna_group} dans le fichier devices_db.yaml""")
     if ht < 30 : 
         ERROR(f"""La hauteur {ht} metres du groupe d'antenne '{antenna_group}' introduite dans le fichier de cas YAML est plus petite que 30 metres. 
 Le model okumura ne s'applique pas.
-Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {antenna_group} dans le fichier device_db.yaml""")
+Veuillez changer le groupe de l'antenne consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {antenna_group} dans le fichier devices_db.yaml""")
     if hr > 10 :
         ERROR(f"""La hauteur {ht} metres du groupe d'UE '{ue_group}' introduite dans le fichier de cas YAML est plus grande que 10 metres. 
 Le model okumura ne s'applique pas. 
-Veuillez changer le groupe de l'ue consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {ue_group} dans le fichier device_db.yaml""")
+Veuillez changer le groupe de l'ue consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {ue_group} dans le fichier devices_db.yaml""")
     if hr < 1 : 
         ERROR(f"""La hauteur {ht} metres du groupe d'UE '{ue_group}' introduite dans le fichier de cas YAML est plus petite que 1 metres. 
 Le model okumura ne s'applique pas. 
-Veuillez changer le groupe de l'ue consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {ue_group} dans le fichier device_db.yaml""")
+Veuillez changer le groupe de l'ue consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {ue_group} dans le fichier devices_db.yaml""")
     return True
 
 # Fonction permettant de calculer le pathloss entre une antenne et une UE
@@ -789,7 +789,7 @@ def lab2 (data_case):
     # doivent avoir leur coordonées initialisées
     # CETTE FONCTION EST OBLIGATOIRE
     fichier_de_cas = data_case
-    fichier_de_devices = read_yaml_file("device_db.yaml")
+    fichier_de_devices = read_yaml_file("devices_db.yaml")
     coord_file_name, mode = check_coord_files_mode(fichier_de_cas)
     if mode == False :
         ues = assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices)
@@ -966,7 +966,7 @@ def main(arg):
         return
 
     # Debut du programme :
-    device_file_name = "device_db.yaml"
+    device_file_name = "devices_db.yaml"
     data_case = read_yaml_file(case_file_name)
     data_device = read_yaml_file(device_file_name)
     
