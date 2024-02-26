@@ -923,11 +923,11 @@ def sanity_check_dimensions(fichier_de_cas):
     length = get_from_dict('length', fichier_de_cas)
     height = get_from_dict('height', fichier_de_cas)
     if length <= 1000 or height <= 1000 :
-        print("WARNING : one of the rectangle's dimensions are under 1000 m!")
+        print(f"WARNING : The rectangle's dimensions ({length} meters by {height} meters) are too small!!")
         print("WARNING : Are you sure that the dimensions specified in the case file are in meters?")
         print("Continuing anyway...")
     if length >= 100000 or height >= 100000 :
-        print("WARNING : one of the rectangle's dimensions are over 100 000 m!")
+        print(f"WARNING : The rectangle's dimensions ({length} meters by {height} meters) are too big!!")
         print("WARNING : Are you sure that the dimensions specified in the case file are in meters?")
         print("Continuing anyway...")
 
