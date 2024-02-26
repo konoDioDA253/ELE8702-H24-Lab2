@@ -290,7 +290,7 @@ def lire_coordonnees_ues(filename):
             # Vérifier si la ligne commence par "ue"
             if ligne.startswith("ue"):
                 # Diviser la ligne en utilisant le caractère de tabulation comme séparateur
-                elements = ligne.strip().split('\t')
+                elements = ligne.strip().split()
 
                 # Récupérer les éléments individuels
                 nom_ue = elements[0]
@@ -322,7 +322,7 @@ def lire_coordonnees_antennes(filename):
             # Vérifier si la ligne commence par "antenna"
             if ligne.startswith("antenna"):
                 # Diviser la ligne en utilisant le caractère de tabulation comme séparateur
-                elements = ligne.strip().split('\t')
+                elements = ligne.strip().split()
 
                 # Récupérer les éléments individuels
                 nom_antenne = elements[0]
