@@ -15,8 +15,8 @@ ETUDE_PATHLOSS:
    ANT_COORD_GEN : g
    UE_COORD_GEN: a
    COORD_FILES:  # Utilisé quand les coordonées sont lues à partir d'un fichier.
-      # read: coords_lab2_eq7.txt # actif quand on lis le fichier de coordonnées
-      write: coords_lab2_eq7.txt   # actif quand on veut écrire les résultats dans un fichier
+      # read: lab2_eq7_coords.txt # actif quand on lis le fichier de coordonnées
+      write: lab2_eq7_coords.txt   # actif quand on veut écrire les résultats dans un fichier
    DEVICES:
       Antenna4 : # Group Antenna1 (comme défini dans la base de données)
          number : 25
@@ -27,9 +27,9 @@ ETUDE_PATHLOSS:
       # UE6-App6 : # Group UE6-App6 (comme défini dans la base de données)
       #    number: 10
    VISIBILITY : # read nlos information
-      read: visibility_lab2_eq7.txt 
+      read: lab2_eq7_visibility.txt 
    GEOMETRY:
       Surface:
          rectangle:
-           length : 7 # en kilomètres
-           height : 6
+           length : 7000 # en mètres
+           height : 6000

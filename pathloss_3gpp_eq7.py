@@ -88,8 +88,8 @@ def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     c = 3e8
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_m = 1000*distance_2D_km
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_km = distance_2D_m/1000
     frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     frequence_Hz = 1000000000*frequence_GHz
     hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
@@ -142,8 +142,8 @@ def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     c = 3e8
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_m = 1000*distance_2D_km
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_km = distance_2D_m/1000
     frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     frequence_Hz = 1000000000*frequence_GHz
     hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
@@ -213,23 +213,30 @@ def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         pl = 28.0 + 22*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz)
         return pl
 
-    def _uma_los_pl2(distance_3D_m, frequence_GHz, distance_BP_m, hauteur_BS_m, hauteur_UT_m):
-        pl = 28.0 + 40*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz) - 9*math.log10(distance_BP_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) 
+    def _uma_los_pl2(distance_3D_m, frequence_GHz, distance_prime_BP_m, hauteur_BS_m, hauteur_UT_m):
+        pl = 28.0 + 40*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz) - 9*math.log10(distance_prime_BP_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) 
         return pl
     
     # Definition des variables
     c = 3e8
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_m = 1000*distance_2D_km
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_km = distance_2D_m/1000
     frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     frequence_Hz = 1000000000*frequence_GHz
     hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
 
-    distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
-    distance_BP_km = distance_BP_m/1000
+    hE_m = 1.0 
+    hauteur_prime_BS_m = hauteur_BS_m - hE_m 
+    hauteur_prime_UT_m = hauteur_UT_m - hE_m 
+
+    distance_prime_BP_m = 4 * hauteur_prime_BS_m * hauteur_prime_UT_m * frequence_Hz / c 
+    distance_prime_BP_km = distance_prime_BP_m/1000
+
+    # distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
+    # distance_BP_km = distance_BP_m/1000
 
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
     distance_3D_km = distance_3D_m/1000
@@ -239,10 +246,10 @@ def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
 
     # Calcul de pathloss
     warning_message = ""
-    if 10 < distance_2D_m and distance_2D_m < distance_BP_m :
+    if 10 < distance_2D_m and distance_2D_m < distance_prime_BP_m :
         pathloss = _uma_los_pl1(distance_3D_m, frequence_GHz)
-    if distance_BP_km < distance_2D_km and distance_2D_km < 5 :
-        pathloss = _uma_los_pl2(distance_3D_m, frequence_GHz, distance_BP_m, hauteur_BS_m, hauteur_UT_m)
+    if distance_prime_BP_km < distance_2D_km and distance_2D_km < 5 :
+        pathloss = _uma_los_pl2(distance_3D_m, frequence_GHz, distance_prime_BP_m, hauteur_BS_m, hauteur_UT_m)
     if distance_2D_m < 10 :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
 Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
@@ -269,15 +276,22 @@ def uma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     c = 3e8
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_m = 1000*distance_2D_km
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_km = distance_2D_m/1000
     frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     frequence_Hz = 1000000000*frequence_GHz
     hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
 
-    distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
-    distance_BP_km = distance_BP_m/1000
+    hE_m = 1.0 
+    hauteur_prime_BS_m = hauteur_BS_m - hE_m 
+    hauteur_prime_UT_m = hauteur_UT_m - hE_m 
+
+    distance_prime_BP_m = 4 * hauteur_prime_BS_m * hauteur_prime_UT_m * frequence_Hz / c 
+    distance_prime_BP_km = distance_prime_BP_m/1000
+
+    # distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
+    # distance_BP_km = distance_BP_m/1000
 
     distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
     distance_3D_km = distance_3D_m/1000
@@ -351,17 +365,16 @@ def umi_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     c = 3e8
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_m = 1000*distance_2D_km
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_km = distance_2D_m/1000
     frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     frequence_Hz = 1000000000*frequence_GHz
     hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
-    hE_m = 1.0 #????????????????????
-    hauteur_prime_BS_m = hauteur_BS_m - hE_m #??????? 
-    hauteur_prime_UT_m = hauteur_UT_m - hE_m #???????
+    hE_m = 1.0 
+    hauteur_prime_BS_m = hauteur_BS_m - hE_m 
+    hauteur_prime_UT_m = hauteur_UT_m - hE_m 
 
-    # distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
     distance_prime_BP_m = 4 * hauteur_prime_BS_m * hauteur_prime_UT_m * frequence_Hz / c 
     distance_prime_BP_km = distance_prime_BP_m/1000
 
@@ -403,16 +416,16 @@ def umi_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     c = 3e8
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_km = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_m = 1000*distance_2D_km
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
+    distance_2D_km = distance_2D_m/1000
     frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     frequence_Hz = 1000000000*frequence_GHz
     hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
     hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
 
-    hE_m = 1.0 #????????????????????
-    hauteur_prime_BS_m = hauteur_BS_m - hE_m #??????? 
-    hauteur_prime_UT_m = hauteur_UT_m - hE_m #???????
+    hE_m = 1.0 
+    hauteur_prime_BS_m = hauteur_BS_m - hE_m 
+    hauteur_prime_UT_m = hauteur_UT_m - hE_m 
 
     distance_prime_BP_m = 4 * hauteur_prime_BS_m * hauteur_prime_UT_m * frequence_Hz / c 
     distance_prime_BP_km = distance_prime_BP_m/1000

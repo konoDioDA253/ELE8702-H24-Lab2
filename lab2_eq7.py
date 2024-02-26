@@ -10,16 +10,16 @@ import random
 import os
 import argparse
 import matplotlib.pyplot as plt
-from calcul_pathloss_3gpp_eq7 import *
+from pathloss_3gpp_eq7 import *
 
 # Variables GLOBAL
 # Numero propres a l'équipe
 numero_equipe = '7'
 numero_lab = '2'
 # (PROF) Est-ce que c'est du Hard-wired? Comment le faire a travers le fichier de cas? BS****
-pathloss_file_name = "pl_lab"+ numero_lab + "_eq"+ numero_equipe + ".txt"
-assoc_ues_file_name = "assoc_ue_lab"+ numero_lab + "_eq" + numero_equipe + ".txt"
-assoc_antennas_file_name = "assoc_ant_lab"+ numero_lab + "_eq" + numero_equipe + ".txt"
+pathloss_file_name = "lab"+numero_lab+"_eq"+numero_equipe+"_pl.txt"
+assoc_ues_file_name = "lab"+numero_lab+"_eq"+numero_equipe+"_assoc_ue.txt"
+assoc_antennas_file_name = "lab"+numero_lab+"_eq"+numero_equipe+"_assoc_ant.txt"
 
 
 # Germe de toutes les fonctions aléatoires
@@ -451,7 +451,7 @@ def okumura(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         ht = get_from_dict('height', get_from_dict(antenna_group, get_from_dict(next(iter(fichier_de_device)), fichier_de_device)))
         hr = get_from_dict('height', get_from_dict(ue_group,fichier_de_device))
         verify_okumura_conditions(fc,ht,hr, antenna_group, ue_group)        
-        distance = calculate_distance(antenna_coords, ue_coords)
+        distance = calculate_distance(antenna_coords, ue_coords)/1000 # distance in km!
         
         A = (1.1 * math.log10(fc) - 0.7) * hr - 1.56 * math.log10(fc) + 0.8
             
@@ -475,7 +475,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
         ht = get_from_dict('height', get_from_dict(antenna_group, get_from_dict(next(iter(fichier_de_device)), fichier_de_device)))
         hr = get_from_dict('height', get_from_dict(ue_group,fichier_de_device))
         verify_okumura_conditions(fc,ht,hr, antenna_group, ue_group)
-        distance = calculate_distance(antenna_coords, ue_coords)
+        distance = calculate_distance(antenna_coords, ue_coords)/1000 # distance in km!
         
         if fc < 300:
             A = 8.29 * (math.log10(1.54 * hr))**2 - 1.1
@@ -502,7 +502,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
         ht = get_from_dict('height',get_from_dict(antenna_group, get_from_dict(next(iter(fichier_de_device)), fichier_de_device)))
         hr = get_from_dict('height', get_from_dict(ue_group,fichier_de_device))
         verify_okumura_conditions(fc,ht,hr, antenna_group, ue_group)
-        distance = calculate_distance(antenna_coords, ue_coords)
+        distance = calculate_distance(antenna_coords, ue_coords)/1000 # distance in km!
         
         A = (1.1 * math.log10(fc) - 0.7) * hr - 1.56 * math.log10(fc) + 0.8
 
@@ -527,7 +527,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
         ht = get_from_dict('height', get_from_dict(antenna_group, get_from_dict(next(iter(fichier_de_device)), fichier_de_device)))
         hr = get_from_dict('height', get_from_dict(ue_group,fichier_de_device))
         verify_okumura_conditions(fc,ht,hr, antenna_group, ue_group)
-        distance = calculate_distance(antenna_coords, ue_coords)
+        distance = calculate_distance(antenna_coords, ue_coords)/1000 # distance in km!
         
         A = (1.1 * math.log10(fc) - 0.7) * hr - 1.56 * math.log10(fc) + 0.8
         
@@ -895,7 +895,7 @@ def treat_cli_args(arg):
     # À noter que dans cette fonction il faut ajouter les vérifications qui s'imposent
     # par exemple, nombre d'arguments appropriés, existance du fichier de cas, etc.
     
-    case_file_name = "cas_lab2_eq7.yaml" # UNCOMMENT TO ALLOW DEBUGGING IN VSCODE
+    case_file_name = "lab2_eq7_cas.yaml" # UNCOMMENT TO ALLOW DEBUGGING IN VSCODE
     # case_file_name = arg[0] # UNCOMMENT FOR CLI FINAL RELEASE, COMMENT OTHERWISE
     # Check if the file exists
     YAML_file_exists = True
