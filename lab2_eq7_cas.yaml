@@ -31,5 +31,5 @@ ETUDE_PATHLOSS:
    GEOMETRY:
       Surface:
          rectangle:
-           length : 7000 # en mètres
+           length : 7000 # il faut obligatoirement considérer des mètres
            height : 6000

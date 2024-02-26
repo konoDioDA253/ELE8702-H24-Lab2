@@ -922,9 +922,13 @@ def treat_cli_args(arg):
 def sanity_check_dimensions(fichier_de_cas):
     length = get_from_dict('length', fichier_de_cas)
     height = get_from_dict('height', fichier_de_cas)
-    if length >= 100 or height >= 100 :
-        print("WARNING : one of the rectangle's dimensions are over 100 km!")
-        print("WARNING : Are you sure that the dimensions specified in the case file are in kilometers?")
+    if length <= 1000 or height <= 1000 :
+        print("WARNING : one of the rectangle's dimensions are under 1000 m!")
+        print("WARNING : Are you sure that the dimensions specified in the case file are in meters?")
+        print("Continuing anyway...")
+    if length >= 100000 or height >= 100000 :
+        print("WARNING : one of the rectangle's dimensions are over 100 000 m!")
+        print("WARNING : Are you sure that the dimensions specified in the case file are in meters?")
         print("Continuing anyway...")
 
 # Fonction vérifiant si le programme doit fournir un fichier log des warnings du calcul des pathloss
@@ -936,7 +940,8 @@ def write_pathloss_warning_log_file(warning_log, filename, fichier_de_cas):
         write_to_file(filename, warning_log)
         count = warning_log.count("WARNING")
         model = get_from_dict('model', fichier_de_cas)
-        print(f"WARNING : During the pathloss calculation, a total of {count} pathloss values had distances that did not meet the conditions of the {model} model. Please find more details in the file '{filename}'.")
+        scenario = get_from_dict('scenario', fichier_de_cas)
+        print(f"WARNING : During the pathloss calculation, a total of {count} pathloss values had distances that did not meet the conditions of the {model} model (considering scenario {scenario}). Please find more details in the file '{filename}'.")
 
 
 # Fonction main du programme (requise), elle appelle les autres fonctions du programme
