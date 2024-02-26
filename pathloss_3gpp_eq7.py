@@ -2,6 +2,7 @@
 # On considere seulement les scenario RMa, UMa et UMi
 import math
 import sys
+infini = float('inf') #définition de l'infini
 # Fonction donnant le group et les coords a partir du ID d'un objet dans une liste du meme objet
 def get_group_and_coords_by_id_3GPP(object_list, target_id):
     for object in object_list:
@@ -122,7 +123,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
     if 10 < distance_2D_km :
         warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 10 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-        pathloss = 1000000000000000000000000000000000000000000
+        pathloss = infini
     return pathloss, warning_message
 
 # Cas RMA NLOS
@@ -177,7 +178,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
     if 5 < distance_2D_km :
         warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-        pathloss = 1000000000000000000000000000000000000000000
+        pathloss = infini
     return pathloss, warning_message
 
 
@@ -257,7 +258,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
     if 5 < distance_2D_km :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
     return pathloss, warning_message
 
 def uma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues) :
@@ -314,7 +315,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
     if 5 < distance_2D_km :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
     return pathloss, warning_message
 
 
@@ -397,7 +398,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
     if 5 < distance_2D_km :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
     return pathloss, warning_message
 
 def umi_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues) :
@@ -450,5 +451,5 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
     if  5 < distance_2D_km :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
     return pathloss, warning_message

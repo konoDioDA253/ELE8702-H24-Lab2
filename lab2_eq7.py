@@ -14,6 +14,7 @@ from pathloss_3gpp_eq7 import *
 
 # Variables GLOBAL
 # Numero propres a l'équipe
+infini = float('inf') #définition de l'infini
 numero_equipe = '7'
 numero_lab = '2'
 # (PROF) Est-ce que c'est du Hard-wired? Comment le faire a travers le fichier de cas? BS****
@@ -462,7 +463,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
         elif distance > 20 :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 20 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
         else:
             pathloss = 69.55 + 26.16 * math.log10(fc) - 13.82 * math.log10(ht) - A + (44.9 - 6.55 * math.log10(ht)) * math.log10(distance)
         
@@ -489,7 +490,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
         elif distance > 20 :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 20 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
         else:       
             pathloss = 69.55 + 26.16 * math.log10(fc) - 13.82 * math.log10(ht) - A + (44.9 - 6.55 * math.log10(ht)) * math.log10(distance)
         
@@ -513,7 +514,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
         elif distance > 20 :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 20 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
         else:
             pathloss_urban_small = 69.55 + 26.16 * math.log10(fc) - 13.82 * math.log10(ht) - A + (44.9 - 6.55 * math.log10(ht)) * math.log10(distance)
             pathloss = pathloss_urban_small - 2 * (math.log10(fc / 28))**2 - 5.4
@@ -538,7 +539,7 @@ Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
         elif distance > 20 :
             warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 20 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
-            pathloss = 1000000000000000000000000000000000000000000
+            pathloss = infini
         else:
             pathloss_urban_small = 69.55 + 26.16 * math.log10(fc) - 13.82 * math.log10(ht) - A + (44.9 - 6.55 * math.log10(ht)) * math.log10(distance)
             pathloss = pathloss_urban_small - 4.78 * (math.log10(fc))**2 + 18.33 * math.log10(fc) - 40.94
