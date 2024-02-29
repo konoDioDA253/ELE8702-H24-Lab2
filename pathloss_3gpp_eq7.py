@@ -77,7 +77,7 @@ def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     def _rma_los_pl1(distance_3D_m, frequence_GHz, hauteur_standard_m):
         min1 = valeur_minimum(0.03*pow(hauteur_standard_m, 1.72), 10)
         min2 = valeur_minimum(0.044*pow(hauteur_standard_m, 1.72), 14.77)
-        pl = 20*math.log10(40*math.pi*distance_3D_m*frequence_GHz/3) + min1 - min2 + 0.002*math.log10(hauteur_standard_m)*distance_3D_m
+        pl = 20*math.log10(40*math.pi*distance_3D_m*frequence_GHz/3) + min1*math.log10(distance_3D_m) - min2 + 0.002*math.log10(hauteur_standard_m)*distance_3D_m
         return pl
 
     def _rma_los_pl2(distance_3D_m, frequence_GHz, hauteur_standard_m, distance_BP_m):

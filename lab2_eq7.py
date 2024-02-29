@@ -373,7 +373,11 @@ def write_pathloss_to_file(pathlosses, fichier_de_cas):
         for pathloss in pathlosses:
             model = get_from_dict('model', fichier_de_cas)
             scenario = get_from_dict('scenario', fichier_de_cas)
-            line = f"{pathloss.id_ue}\t{pathloss.id_ant}\t{pathloss.value}\t{model}\t{scenario}\n"
+            if scenario.lower() in ["uma", "rma", "umi"]:
+                scenario_formatted = scenario[:2].upper() + scenario[2:].lower()  # Les deux premières lettres en majuscules, le reste en minuscules
+            else:
+                scenario_formatted = scenario.lower()  # Tout en minuscules
+            line = f"{pathloss.id_ue}\t{pathloss.id_ant}\t{pathloss.value}\t{model}\t{scenario_formatted}\n"
             file.write(line)
     print(f"INFO : Wrote file '{filename}' in the current directory.")
 
@@ -444,6 +448,9 @@ Veuillez changer le groupe de l'ue consideree dans le fichier YAML de cas ou mod
 def okumura(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     model = get_from_dict('model', fichier_de_cas)
     scenario = get_from_dict('scenario', fichier_de_cas)
+    # Convertir en minuscules pour supporter les combinaisons de majuscules et minuscules
+    model = model.lower()
+    scenario = scenario.lower()
     warning_message = ""
     if model == "okumura" and scenario == "urban_small":
         antenna_group, antenna_coords = get_group_and_coords_by_id(antennas, antenna_id)
@@ -557,7 +564,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
     return 0
 
 # Fonction permettant de verifier l'integrite du fichier de visibilite fourni par l'utilisateur a travers le fichier de cas
-def sanity_check_visibility_file(filename, nombre_ue):
+def sanity_check_visibility_file(filename, nombre_ue, ues, antennas):
     # Vérifier si le fichier existe 
     if not os.path.exists(filename):
         ERROR(f"Le fichier '{filename}' n'existe pas dans le repertoire courant.")
@@ -586,6 +593,17 @@ def sanity_check_visibility_file(filename, nombre_ue):
                 Le premier chiffre d'une ligne represente une UE et ne peut donc pas se retrouver sur une autre ligne.""")
             first_digits_set.add(first_digit)
 
+
+
+            # Vérifier la présence des UE et des antennes dans les listes respectives
+            ue_id = int(ue_numbers[0])
+            ant_ids = [int(id) for id in ue_numbers[1:]]
+            if not any(ue.id == ue_id for ue in ues):
+                ERROR(f"L'UE avec l'ID {ue_id} du fichier '{filename}' n'est pas présente dans la liste des UEs. SVP choisir dans '{filename}' un autre ID en concordance avec le nombnre d'UE total")
+            for ant_id in ant_ids:
+                if not any(antenna.id == ant_id for antenna in antennas):
+                    ERROR(f"L'antenne avec l'ID {ant_id} du fichier '{filename}' n'est pas présente dans la liste des antennes. SVP choisir dans '{filename}' un autre ID en concordance avec le nombnre d'antennes total")
+
         # Vérifier le nombre de lignes
         ue_count = len(lines)
         min_ue_count = 0.05 * nombre_ue
@@ -600,9 +618,9 @@ def sanity_check_visibility_file(filename, nombre_ue):
 # Fonction permettant de vérifier si la combinaison ue antenne fournie en argument est en situation LoS ou non
 # Retourne True si la combinaison ue antenne est LoS
 # Retourne False sinon
-def verifie_presence_visibility_los(ue, antenne, fichier_de_cas, ues):
+def verifie_presence_visibility_los(ue, antenne, fichier_de_cas, ues, antennas):
     visibility_filename = get_from_dict('read', get_from_dict('VISIBILITY', fichier_de_cas))
-    sanity_check_visibility_file(visibility_filename, len(ues))
+    sanity_check_visibility_file(visibility_filename, len(ues), ues, antennas)
     with open(visibility_filename, 'r') as f:
         for line in f:
             ids = list(map(int, line.split()))
@@ -617,13 +635,15 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
     warning_log = ""
     model = get_from_dict('model', fichier_de_cas)
     scenario = get_from_dict('scenario', fichier_de_cas)
-    # (PROF) : Est-ce correct de stocker le los dans la class pathloss plutot que la class ue?
+    # Convertir en minuscules pour supporter les combinaisons de majuscules et minuscules
+    model = model.lower()
+    scenario = scenario.lower()
     if model == "3gpp" :
-        if scenario == "RMa" :
+        if scenario == "rma" :
             for ue in ues:
                 for antenna in antennas:
                     pathloss = Pathloss(ue.id, antenna.id)
-                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues, antennas)
                     if pathloss.los == True :
                         pathloss_value, warning_message = rma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                     if pathloss.los == False :
@@ -632,11 +652,11 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
                     warning_log += warning_message
                     pathloss_list.append(pathloss)
             return pathloss_list, warning_log
-        if scenario == "UMa" :
+        if scenario == "uma" :
             for ue in ues:
                 for antenna in antennas:
                     pathloss = Pathloss(ue.id, antenna.id)
-                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues, antennas)
                     if pathloss.los == True :
                         pathloss_value, warning_message = uma_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                     if pathloss.los == False :
@@ -645,11 +665,11 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
                     warning_log += warning_message
                     pathloss_list.append(pathloss)
             return pathloss_list, warning_log
-        if scenario == "UMi" :
+        if scenario == "umi" :
             for ue in ues:
                 for antenna in antennas:
                     pathloss = Pathloss(ue.id, antenna.id)
-                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
+                    pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues, antennas)
                     if pathloss.los == True :
                         pathloss_value, warning_message = umi_los(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                     if pathloss.los == False :
@@ -669,7 +689,7 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
         for ue in ues:
             for antenna in antennas:
                 pathloss = Pathloss(ue.id, antenna.id)
-                pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues)
+                pathloss.los = verifie_presence_visibility_los(ue.id, antenna.id, fichier_de_cas, ues, antennas)
                 pathloss_value, warning_message = okumura(fichier_de_cas, fichier_de_device, antenna.id, ue.id, antennas, ues)
                 pathloss.value = pathloss_value
                 warning_log += warning_message

@@ -9,14 +9,14 @@
 ETUDE_PATHLOSS:
    PATHLOSS :
        model : 3gpp
-       scenario : UMa
-      #  model : okumura
+       scenario : rMa
+      #  model : okUmura
       #  scenario : urban_small
    ANT_COORD_GEN : g
    UE_COORD_GEN: a
    COORD_FILES:  # Utilisé quand les coordonées sont lues à partir d'un fichier.
-      read: lab2_eq7_coords.txt # actif quand on lis le fichier de coordonnées
-      # write: lab2_eq7_coords.txt   # actif quand on veut écrire les résultats dans un fichier
+      # read: lab2_eq7_coords.txt # actif quand on lis le fichier de coordonnées
+      write: lab2_eq7_coords.txt   # actif quand on veut écrire les résultats dans un fichier
    DEVICES:
       Antenna4 : # Group Antenna1 (comme défini dans la base de données)
          number : 25
