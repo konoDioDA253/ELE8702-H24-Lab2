@@ -21,7 +21,30 @@ numero_lab = '2'
 pathloss_file_name = "lab"+numero_lab+"_eq"+numero_equipe+"_pl.txt"
 assoc_ues_file_name = "lab"+numero_lab+"_eq"+numero_equipe+"_assoc_ue.txt"
 assoc_antennas_file_name = "lab"+numero_lab+"_eq"+numero_equipe+"_assoc_ant.txt"
-
+yaml_structure_message = """
+ETUDE_PATHLOSS :
+    PATHLOSS :
+        model : [3gpp, okUmura]
+        scenario : [RMa, UMa, UMi, urban_small ...] 
+    ANT_COORD_GEN : [g]  # Ajoutez ici d'autres options possibles
+    UE_COORD_GEN : [a]   # Ajoutez ici d'autres options possibles
+    COORD_FILES :
+        read : [fichier_lire.txt]
+        write : [fichier_ecrire.txt]
+    DEVICES :
+        Antenna4 :
+            number : [nombre_d_antennes]
+        UE1-App1 :
+            number : [nombre_d_UEs]
+        ...  # Ajoutez ici d'autres dispositifs si nécessaire
+    VISIBILITY :
+        read : [fichier_visibility.txt]  # Fichier contenant les informations NLOS
+    GEOMETRY :
+        Surface :
+            rectangle :
+                length : [longueur_en_mètres]
+                height : [hauteur_en_mètres]
+"""
 
 # Germe de toutes les fonctions aléatoires
 random.seed(123)
@@ -916,8 +939,11 @@ def treat_cli_args(arg):
     # À noter que dans cette fonction il faut ajouter les vérifications qui s'imposent
     # par exemple, nombre d'arguments appropriés, existance du fichier de cas, etc.
     
-    case_file_name = "lab2_eq7_cas.yaml" # UNCOMMENT TO ALLOW DEBUGGING IN VSCODE
-    # case_file_name = arg[0] # UNCOMMENT FOR CLI FINAL RELEASE, COMMENT OTHERWISE
+    # Vérifier le nombre d'arguments
+    if len(arg) != 1:
+        ERROR("Nombre d'arguments incorrect. Veuillez spécifier 1 nom de fichier de cas dans le format YAML, par exemple 'lab2_eq7_cas.yaml' .")
+    # case_file_name = "lab2_eq7_cas.yaml" # UNCOMMENT TO ALLOW DEBUGGING IN VSCODE
+    case_file_name = arg[0] # UNCOMMENT FOR CLI FINAL RELEASE, COMMENT OTHERWISE
     # Check if the file exists
     YAML_file_exists = True
     YAML_file_correct_extension = True
@@ -971,20 +997,20 @@ def main(arg):
     yaml_exist, yaml_correct_extenstion, correct_yaml_structure, case_file_name = treat_cli_args(arg)
     print("YAML case file name = ", case_file_name)
     if (yaml_exist == False):
-        print("YAML case file doesn't exist!")   
-        return 
+        ERROR("YAML case file doesn't exist!")   
+        # return 
     else:
         print("YAML case file exists")
     if yaml_correct_extenstion == False :
-        print(f"The YAML case file does not have the correct extension.")
-        return
+        ERROR(f"The YAML case file does not have the correct extension (needs to be a .yaml file).")
+        # return
     else:
         print(f"The YAML case file has the correct extension.")
     if correct_yaml_structure == True:
         print(f"The YAML case file has the correct structure.")
     else:
-        print(f"The YAML case file does not have the correct structure.")
-        return
+        ERROR(f"""The YAML case file does not have the correct structure. \n \nHere is an idea of the awaited structure : \n {yaml_structure_message} """)
+        # return
 
     # Debut du programme :
     device_file_name = "devices_db.yaml"
