@@ -26,8 +26,8 @@ ETUDE_PATHLOSS :
     PATHLOSS :
         model : [3gpp, okUmura]
         scenario : [RMa, UMa, UMi, urban_small ...] 
-    ANT_COORD_GEN : [g]  # Ajoutez ici d'autres options possibles
-    UE_COORD_GEN : [a]   # Ajoutez ici d'autres options possibles
+    ANT_COORD_GEN : [g]  
+    UE_COORD_GEN : [a]   
     COORD_FILES :
         read : [fichier_lire.txt]
         write : [fichier_ecrire.txt]
@@ -998,19 +998,16 @@ def main(arg):
     print("YAML case file name = ", case_file_name)
     if (yaml_exist == False):
         ERROR("YAML case file doesn't exist!")   
-        # return 
     else:
         print("YAML case file exists")
     if yaml_correct_extenstion == False :
         ERROR(f"The YAML case file does not have the correct extension (needs to be a .yaml file).")
-        # return
     else:
         print(f"The YAML case file has the correct extension.")
     if correct_yaml_structure == True:
         print(f"The YAML case file has the correct structure.")
     else:
         ERROR(f"""The YAML case file does not have the correct structure. \n \nHere is an idea of the awaited structure : \n {yaml_structure_message} """)
-        # return
 
     # Debut du programme :
     device_file_name = "devices_db.yaml"
