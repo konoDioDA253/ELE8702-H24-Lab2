@@ -588,6 +588,12 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
     return 0
 
 # Fonction permettant de verifier l'integrite du fichier de visibilite fourni par l'utilisateur a travers le fichier de cas
+# Arguments: 4
+# filename : nom du fichier de visibilité à verifier
+# nombre_ue : nombre de ue
+# ues : liste d'objets de type UE
+# antennas : liste d'objets de type Antenna
+# Return value: None
 def sanity_check_visibility_file(filename, nombre_ue, ues, antennas):
     # Vérifier si le fichier existe 
     if not os.path.exists(filename):
