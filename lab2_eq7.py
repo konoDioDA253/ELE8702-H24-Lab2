@@ -299,7 +299,6 @@ def assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices):
 
 
 
-# FAIRE FONCTION DE READ ICI POUR ASSIGNER COORDONNEES UE ET ANTENNE
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN READ**************
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
@@ -660,9 +659,12 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
     warning_log = ""
     model = get_from_dict('model', fichier_de_cas)
     scenario = get_from_dict('scenario', fichier_de_cas)
+    if not (scenario[0].isupper() and scenario[1].isupper() and scenario[-1].islower()):
+        print("INFO : Scenario name in case file is misspelled. It should have 2 uppercases and 1 lowercase. ")
     # Convertir en minuscules pour supporter les combinaisons de majuscules et minuscules
     model = model.lower()
     scenario = scenario.lower()
+
     if model == "3gpp" :
         if scenario == "rma" :
             for ue in ues:
