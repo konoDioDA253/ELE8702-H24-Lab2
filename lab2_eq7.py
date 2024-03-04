@@ -395,16 +395,14 @@ def write_pathloss_to_file(pathlosses, fichier_de_cas):
     with open(filename, 'w') as file:
         for pathloss in pathlosses:
             model = get_from_dict('model', fichier_de_cas)
+            model_formatted = model.lower()
             scenario = get_from_dict('scenario', fichier_de_cas)
-            if scenario.lower() in ["uma", "rma", "umi"]:
-                scenario_formatted = scenario[:2].upper() + scenario[2:].lower()  # Les deux premières lettres en majuscules, le reste en minuscules
-            else:
-                scenario_formatted = scenario.lower()  # Tout en minuscules
+            scenario_formatted = scenario.lower()  # Tout en minuscules
             if pathloss.los == True: ### Ajouter
                 alignement = "los" ### ajouter
             else:
                 alignement = "nlos" ## ajouter 
-            line = f"{pathloss.id_ue}\t{pathloss.id_ant}\t{pathloss.value}\t{model}\t{scenario_formatted}\t{alignement}\n"
+            line = f"{pathloss.id_ue}\t{pathloss.id_ant}\t{pathloss.value}\t{model_formatted}\t{scenario_formatted}\t{alignement}\n"
             file.write(line)
     print(f"INFO : Wrote file '{filename}' in the current directory.")
 
