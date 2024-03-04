@@ -12,8 +12,8 @@ def get_group_and_coords_by_id_3GPP(object_list, target_id):
 
 # Fonction calculant la distance entre deux point sur le terrain
 def calculate_distance_3GPP(coord1, coord2):
-    x1, y1 = coord1
-    x2, y2 = coord2
+    x1, y1 = coord1 # coordonnées du premier point
+    x2, y2 = coord2 # coordonnées du deuxième point
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 # Fonction permettant d'afficher un message d'erreur et de stopper le programme
@@ -66,7 +66,7 @@ Nous ne pouvons pas appliquer les formules de calcul du pathloss 3GPP.""")
 # Cas RMA LOS
 def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     
-    # Definition des fonctions
+    # Definition des fonctions retourne le minimum des deux valeurs passées en paramétre
     def valeur_minimum(val1, val2):
         if val1 < val2:
             val = val1
@@ -86,24 +86,24 @@ def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         return pl
     
     # Definition des variables
-    c = 3e8
+    c = 3e8 # vitesse en m/s
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_km = distance_2D_m/1000
-    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    frequence_Hz = 1000000000*frequence_GHz
-    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords) # distance entre la base de l'UE et l'antenne associer en metre
+    distance_2D_km = distance_2D_m/1000     # distance entre la base de l'UE et l'antenne associer en km
+    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device))) # fréquence antenne en GHz
+    frequence_Hz = 1000000000*frequence_GHz # fréquence antenne en Hz
+    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device))) # hauteur de l'antenne en m
+    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device)) # hauteur de l'ue en km
     hauteur_standard_m = 5 # corresponds a la hauteur de batiment moyenne, 5m par defaut
 
 
 
-    distance_BP_m = 2* math.pi * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
-    distance_BP_km = distance_BP_m/1000
+    distance_BP_m = 2* math.pi * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c # distance de Breakpoint en m
+    distance_BP_km = distance_BP_m/1000 # distance de Breakpoint en km
 
-    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
-    distance_3D_km = distance_3D_m/1000
+    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) # distance entre le sommet de l'ue et l'antenne en m
+    distance_3D_km = distance_3D_m/1000     # distance entre le sommet de l'ue et l'antenne en km
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
     check_range(hauteur_BS_m, 10, 150)
@@ -129,7 +129,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
 # Cas RMA NLOS
 def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues) :
     
-    # Definition des fonctions
+    # Definition des fonctions (fonction retournant le max des deux valeurs passée en paramètre et un message d'avertissement)
     def max_comparator(pl_los, pl_nlosp, warning_message_rma_los, warning_message_rma_nlosp):
         if pl_los < pl_nlosp :
             pl = pl_nlosp
@@ -140,23 +140,23 @@ def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
         return pl, warning_message
     
     # Definition des variables
-    c = 3e8
+    c = 3e8 # la vitesse de la lumière en m/m
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_km = distance_2D_m/1000
-    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    frequence_Hz = 1000000000*frequence_GHz
-    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords) # distance entre la base de l'UE et l'antenne associer en metre
+    distance_2D_km = distance_2D_m/1000  # distance entre la base de l'UE et l'antenne associer en km
+    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))    # frequence de l'antenne en GHz
+    frequence_Hz = 1000000000*frequence_GHz # Frequence de l'antenne en GHz
+    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))    # Hauteur de l'antenne en m
+    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device)) # Hauteur de l'ue en m
     hauteur_standard_m = 5 # corresponds a la hauteur de batiment moyenne, 5m par defaut
     largeur_standard_m = 20 # correspond a la largeur moyenne des rues, 20m par defaut
 
     distance_BP_m = 2* math.pi * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
     distance_BP_km = distance_BP_m/1000
 
-    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
-    distance_3D_km = distance_3D_m/1000
+    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) # distance entre le sommet de l'ue et l'antenne en m
+    distance_3D_km = distance_3D_m/1000  # distance entre le sommet de l'ue et l'antenne en km
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
     check_range(hauteur_BS_m, 10, 150)
@@ -219,15 +219,15 @@ def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         return pl
     
     # Definition des variables
-    c = 3e8
+    c = 3e8 # vitesse en m/s
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
-    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
-    distance_2D_km = distance_2D_m/1000
-    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
+    distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords) # distance entre la base de l'UE et l'antenne associer en metre
+    distance_2D_km = distance_2D_m/1000     # distance entre la base de l'UE et l'antenne associer en km
+    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device))) # frenquence de l'atenne en Ghz
     frequence_Hz = 1000000000*frequence_GHz
-    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
+    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device))) # hauteur de antenne en m
+    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device)) #hauteur de l'ue en m
 
     hE_m = 1.0 
     hauteur_prime_BS_m = hauteur_BS_m - hE_m 
@@ -239,8 +239,8 @@ def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     # distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
     # distance_BP_km = distance_BP_m/1000
 
-    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
-    distance_3D_km = distance_3D_m/1000
+    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2) # distance entre le sommet de l'ue et l'antenne en m
+    distance_3D_km = distance_3D_m/1000 # distance entre le sommet de l'ue et l'antenne en km
 
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
     check_range(hauteur_UT_m, 1.5, 22.5)
@@ -274,15 +274,15 @@ def uma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
         return pl, warning_message
     
     # Definition des variables
-    c = 3e8
+    c = 3e8 # vitesse en m/s
     antenna_group, antenna_coords = get_group_and_coords_by_id_3GPP(antennas, antenna_id)
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
     distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
     distance_2D_km = distance_2D_m/1000
-    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    frequence_Hz = 1000000000*frequence_GHz
-    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
+    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device))) # frequence de l'antenne en Ghz
+    frequence_Hz = 1000000000*frequence_GHz  # frequence de l'antenne en Hz
+    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))    # hauteur de l'antenne en metre
+    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))     # Hauteur de l'ue en m
 
     hE_m = 1.0 
     hauteur_prime_BS_m = hauteur_BS_m - hE_m 
@@ -294,8 +294,8 @@ def uma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     # distance_BP_m = 4 * hauteur_BS_m * hauteur_UT_m * frequence_Hz / c 
     # distance_BP_km = distance_BP_m/1000
 
-    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
-    distance_3D_km = distance_3D_m/1000
+    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)      # distance entre le sommet de l'ue et l'antenne en m
+    distance_3D_km = distance_3D_m/1000     # distance entre le sommet de l'ue et l'antenne en km
     
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
@@ -419,10 +419,10 @@ def umi_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     ue_group, ue_coords = get_group_and_coords_by_id_3GPP(ues, ue_id)
     distance_2D_m = calculate_distance_3GPP(antenna_coords, ue_coords)
     distance_2D_km = distance_2D_m/1000
-    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    frequence_Hz = 1000000000*frequence_GHz
-    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))
-    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device))
+    frequence_GHz = get_from_dict_3GPP('frequency', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))       ## frequence de l'antenne en GHz 
+    frequence_Hz = 1000000000*frequence_GHz     # frequence de l'antenne  en GHz 
+    hauteur_BS_m = get_from_dict_3GPP('height', get_from_dict_3GPP(antenna_group, get_from_dict_3GPP(next(iter(fichier_de_device)), fichier_de_device)))    # hauteur de l'antenne
+    hauteur_UT_m = get_from_dict_3GPP('height', get_from_dict_3GPP(ue_group,fichier_de_device)) # hauteur de l'ue
 
     hE_m = 1.0 
     hauteur_prime_BS_m = hauteur_BS_m - hE_m 
@@ -431,8 +431,8 @@ def umi_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     distance_prime_BP_m = 4 * hauteur_prime_BS_m * hauteur_prime_UT_m * frequence_Hz / c 
     distance_prime_BP_km = distance_prime_BP_m/1000
 
-    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)
-    distance_3D_km = distance_3D_m/1000
+    distance_3D_m = math.sqrt(distance_2D_m**2 + (hauteur_BS_m - hauteur_UT_m)**2)      # distance entre le sommet de l'ue et l'antenne en m
+    distance_3D_km = distance_3D_m/1000     # distance entre le sommet de l'ue et l'antenne en km
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
     check_range(hauteur_UT_m, 1.5, 22.5)
