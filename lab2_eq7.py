@@ -990,7 +990,7 @@ def write_pathloss_warning_log_file(warning_log, filename, fichier_de_cas):
         count = warning_log.count("WARNING")
         model = get_from_dict('model', fichier_de_cas)
         scenario = get_from_dict('scenario', fichier_de_cas)
-        print(f"WARNING : During the pathloss calculation, a total of {count} pathloss values had distances that did not meet the conditions of the {model} model (considering scenario {scenario}). Please find more details in the file '{filename}'.")
+        print(f"WARNING : During the pathloss calculation, a total of {count} pathloss values had parameters that did not meet the conditions of the {model} model (considering scenario {scenario}). Please find more details in the file '{filename}'.")
 
 
 # Fonction main du programme (requise), elle appelle les autres fonctions du programme

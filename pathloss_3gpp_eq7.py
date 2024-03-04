@@ -47,10 +47,13 @@ def get_from_dict_3GPP(key, data, res=None, curr_level = 1, min_level = 1):
     return res 
 
 
-def check_range(value, range1, range2):
+def check_range(value, range1, range2, id_ue, id_ant):
+    warning_message = ""
     if value < range1 or value > range2:
-        ERROR_3GPP(f"""La valeur {value}m est en dehors de l'intervalle [{range1}, {range2}].
-Nous ne pouvons pas appliquer les formules de calcul du pathloss 3GPP.""")
+        warning_message = f"""WARNING HAUTEUR: La hauteur {value}m  d'un equipement de la combinaison UE {id_ue} et antenne {id_ant} est en dehors de l'intervalle [{range1}m, {range2}m].
+Nous ne pouvons pas appliquer les formules de calcul du pathloss 3GPP.
+Le programme poursuit malgré cela en assumant les valeurs fournies pour cette combinaison d'equipements...\n"""
+    return warning_message
 
 
 
@@ -106,22 +109,22 @@ def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     distance_3D_km = distance_3D_m/1000     # distance entre le sommet de l'ue et l'antenne en km
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
-    check_range(hauteur_BS_m, 10, 150)
-    check_range(hauteur_UT_m, 1, 10)
-    check_range(hauteur_standard_m, 5, 50)
+    warning_message = ""
+    warning_message += check_range(hauteur_BS_m, 10, 150, ue_id, antenna_id)
+    warning_message += check_range(hauteur_UT_m, 1, 10, ue_id, antenna_id)
+    warning_message += check_range(hauteur_standard_m, 5, 50, ue_id, antenna_id)
 
     # Calcul de pathloss
-    warning_message = ""
     if 10 < distance_2D_m and distance_2D_m < distance_BP_m :
         pathloss = _rma_los_pl1(distance_3D_m, frequence_GHz, hauteur_standard_m)
     if distance_BP_km < distance_2D_km and distance_2D_km < 10 :
         pathloss = _rma_los_pl2(distance_3D_m, frequence_GHz, hauteur_standard_m, distance_BP_m)
     if distance_2D_m < 10 :
-        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+        warning_message += f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
 Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
         pathloss = 0
     if 10 < distance_2D_km :
-        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 10 km.
+        warning_message += f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 10 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
         pathloss = infini
     return pathloss, warning_message
@@ -159,24 +162,25 @@ def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     distance_3D_km = distance_3D_m/1000  # distance entre le sommet de l'ue et l'antenne en km
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
-    check_range(hauteur_BS_m, 10, 150)
-    check_range(hauteur_UT_m, 1, 10)
-    check_range(hauteur_standard_m, 5, 50)
-    check_range(largeur_standard_m, 5, 50)
+    warning_message = ""
+    warning_message_rma_nlosp = ""
+    warning_message_rma_nlosp += check_range(hauteur_BS_m, 10, 150, ue_id, antenna_id)
+    warning_message_rma_nlosp += check_range(hauteur_UT_m, 1, 10, ue_id, antenna_id)
+    warning_message_rma_nlosp += check_range(hauteur_standard_m, 5, 50, ue_id, antenna_id)
+    warning_message_rma_nlosp += check_range(largeur_standard_m, 5, 50, ue_id, antenna_id)
 
     # Calcul de pathloss
     if 10 < distance_2D_m and distance_2D_km < 5 :
         warning_message_rma_los = ""
-        warning_message_rma_nlosp = ""
         pl_rma_los, warning_message_rma_los = rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         pl_rma_nlosp = 161.04 - 7.1*math.log10(largeur_standard_m) + 7.5*math.log10(hauteur_standard_m) - (24.37 - 3.7*(hauteur_standard_m/hauteur_BS_m)**2)*math.log10(hauteur_BS_m) + (43.42 - 3.1*math.log10(hauteur_BS_m))*(math.log10(distance_3D_m) - 3) + 20*math.log10(frequence_GHz) - (3.2*(math.log10(11.75*hauteur_UT_m))**2 - 4.97)
         pathloss, warning_message = max_comparator(pl_rma_los, pl_rma_nlosp, warning_message_rma_los, warning_message_rma_nlosp)
     if distance_2D_m < 10  :
-        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+        warning_message += warning_message_rma_nlosp + f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
 Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
         pathloss = 0
     if 5 < distance_2D_km :
-        warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
+        warning_message += warning_message_rma_nlosp + f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
         pathloss = infini
     return pathloss, warning_message
@@ -243,20 +247,20 @@ def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     distance_3D_km = distance_3D_m/1000 # distance entre le sommet de l'ue et l'antenne en km
 
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
-    check_range(hauteur_UT_m, 1.5, 22.5)
+    warning_message = ""
+    warning_message += check_range(hauteur_UT_m, 1.5, 22.5, ue_id, antenna_id)
 
     # Calcul de pathloss
-    warning_message = ""
     if 10 < distance_2D_m and distance_2D_m < distance_prime_BP_m :
         pathloss = _uma_los_pl1(distance_3D_m, frequence_GHz)
     if distance_prime_BP_km < distance_2D_km and distance_2D_km < 5 :
         pathloss = _uma_los_pl2(distance_3D_m, frequence_GHz, distance_prime_BP_m, hauteur_BS_m, hauteur_UT_m)
     if distance_2D_m < 10 :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+            warning_message += f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
 Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
             pathloss = 0
     if 5 < distance_2D_km :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
+            warning_message += f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
             pathloss = infini
     return pathloss, warning_message
@@ -299,21 +303,22 @@ def uma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
-    check_range(hauteur_UT_m, 1.5, 22.5)
+    warning_message = ""
+    warning_message_uma_nlosp = ""
+    warning_message_uma_nlosp += check_range(hauteur_UT_m, 1.5, 22.5, ue_id, antenna_id)
 
     # Calcul de pathloss
     if 10 < distance_2D_m and distance_2D_km < 5 :
         warning_message_uma_los = ""
-        warning_message_uma_nlosp = ""
         pl_uma_los, warning_message_uma_los = uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         pl_uma_nlosp = 13.54 + 39.08*math.log10(distance_3D_m) + 20*math.log10(frequence_GHz) -0.6*(hauteur_UT_m - 1.5)
         pathloss, warning_message = max_comparator(pl_uma_los, pl_uma_nlosp, warning_message_uma_los, warning_message_uma_nlosp)
     if distance_2D_m < 10  :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+            warning_message += warning_message_uma_nlosp + f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
 Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
             pathloss = 0
     if 5 < distance_2D_km :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
+            warning_message += warning_message_uma_nlosp + f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
             pathloss = infini
     return pathloss, warning_message
@@ -383,20 +388,20 @@ def umi_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
     distance_3D_km = distance_3D_m/1000
 
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
-    check_range(hauteur_UT_m, 1.5, 22.5)
+    warning_message = ""
+    warning_message += check_range(hauteur_UT_m, 1.5, 22.5, ue_id, antenna_id)
 
     # Calcul de pathloss
-    warning_message = ""
     if 10 < distance_2D_m and distance_2D_m < distance_prime_BP_m :
         pathloss = _umi_los_pl1(distance_3D_m, frequence_GHz)
     if distance_prime_BP_m < distance_2D_m and distance_2D_km < 5 :
         pathloss = _umi_los_pl2(distance_3D_m, frequence_GHz, distance_prime_BP_m, hauteur_BS_m, hauteur_UT_m)
     if distance_2D_m < 10 :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+            warning_message += f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
 Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
             pathloss = 0
     if 5 < distance_2D_km :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
+            warning_message += f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
             pathloss = infini
     return pathloss, warning_message
@@ -435,21 +440,22 @@ def umi_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues
     distance_3D_km = distance_3D_m/1000     # distance entre le sommet de l'ue et l'antenne en km
     
     # Verifier que nous pouvons utiliser les formules 3GPP avec les valeurs fournies
-    check_range(hauteur_UT_m, 1.5, 22.5)
+    warning_message = ""
+    warning_message_umi_nlosp = ""
+    warning_message_umi_nlosp += check_range(hauteur_UT_m, 1.5, 22.5, ue_id, antenna_id)
     
     # Calcul de pathloss
     if 10 < distance_2D_m and distance_2D_km < 5 :
         warning_message_umi_los = ""
-        warning_message_umi_nlosp = ""
         pl_umi_los, warning_message_umi_los = umi_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues)
         pl_umi_nlosp = 35.3*math.log10(distance_3D_m) + 22.4 + 21.3*math.log10(frequence_GHz) - 0.3*(hauteur_UT_m - 1.5)
         pathloss, warning_message = max_comparator(pl_umi_los, pl_umi_nlosp, warning_message_umi_los, warning_message_umi_nlosp)
     if distance_2D_m < 10  :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
+            warning_message += warning_message_umi_nlosp + f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus petite que 10 m.
 Nous considerons un pathloss valant 0 entre ces deux equipements\n"""
             pathloss = 0
     if  5 < distance_2D_km :
-            warning_message = f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
+            warning_message += warning_message_umi_nlosp + f"""WARNING : la distance entre l'UE {ue_id} et l'antenne {antenna_id} est plus grande que 5 km.
 Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""            
             pathloss = infini
     return pathloss, warning_message
