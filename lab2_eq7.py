@@ -128,6 +128,8 @@ def fill_up_the_lattice(N, lh, lv, nh, nv):
     return coords
 
 # Fonction utilisee dans la generation de coordonnees des antennes
+# Nbre de param: 5 (lh = longeur horizontal, lv = longeur vertival, N = nombre total de point ,np = nbre de point, nh = nbre de point en horizontal, nv = nbre de point en vertical)
+# valeur de retour: coords = coordonnees
 def get_rectangle_lattice_coords(lh, lv, N, Np, nh, nv):
     """Function appelee par gen_lattice_coords()"""
     
@@ -312,6 +314,7 @@ def assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices):
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN READ**************
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
+# Nbre de param: 1 (filename = nom du fichier a lire) ??? Pourquoi est-ce qu'on retourne une liste ici il faut juste lire
 def lire_coordonnees_ues(filename):
     liste_ues_avec_coordonnees = []
     print(f"INFO : Reading UEs data in file '{filename}' in the current directory.")
@@ -382,6 +385,7 @@ def write_to_file(filename, log_message):
 
 
 # Fonction qui ecrit les information par rapport aux coordonnees des antennes et au UEs dans le fichier de sortie specifiee
+# Nbre de param : 3 (antennas = liste des antennes, ues = liste des ues, fichier_de_cas)
 def write_coordinates_to_file(antennas, ues, fichier_de_cas):
     coord_file_name, mode = check_coord_files_mode(fichier_de_cas)
     if mode == 0 :
@@ -442,6 +446,7 @@ def write_assoc_ant_to_file(ues):
 
 # Fonction calculant la distance entre deux point sur le terrain
 # Nbre Param: 2 (coodonnées du point 1 et 2 )
+# Valeur de retour = valeur numérique de la distance calculer
 def calculate_distance(coord1, coord2):
     x1, y1 = coord1
     x2, y2 = coord2
@@ -483,7 +488,8 @@ Le model okumura ne s'applique pas.
 Veuillez changer le groupe de l'ue consideree dans le fichier YAML de cas ou modifier l'attribut 'height' du groupe {ue_group} dans le fichier devices_db.yaml""")
     return True
 
-# Fonction permettant de calculer le pathloss entre une antenne et une UE
+# Fonction permettant de calculer le pathloss entre une antenne et une UE tout en verifiant les condition d'application
+# Nbre de parametre: 6 (fichier_de_cas, fichier_de_device, antenna_id = identifiant de l'antenne, ue_id = identifiant de l'ue, antennas = liste des antennes, ues = liste des ues)
 def okumura(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     model = get_from_dict('model', fichier_de_cas)
     scenario = get_from_dict('scenario', fichier_de_cas)
@@ -675,6 +681,8 @@ def verifie_presence_visibility_los(ue, antenne, fichier_de_cas, ues, antennas):
 
 # ****************************CHANGER POUR 3GPP**********************************
 # Fonction permettant d'assigner un pathloss à chaque combinaison (antenne,UE) du terrain
+# Nbre param: 4 (fichier_de_cas, fichier_de_device, antennas = liste des antenne, ues =liste des ues)
+# Valeur de retour: pathloss_list = liste des pathloss calculer, warning_log = message d'avertissement 
 def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
     pathloss_list =[]
     warning_log = ""
@@ -755,6 +763,8 @@ def pathloss_attribution(fichier_de_cas, fichier_de_device, antennas, ues):
 
 
 # Fonction permettant d'associer les UEs du terrain a leur antenne ayant le pathloss minimal
+# Nbre de param: 3 (pathlosses = liste des pathloss, antennas = liste des antenne, ues = liste des ues)
+# Valeur de retour: antennas = liste des antennes associer, ues = liste des ues associer
 def association_ue_antenne(pathlosses, antennas, ues):
     # Initialiser un dictionnaire pour stocker l'antenne avec le pathloss le plus petit pour chaque UE
     ue_to_antenna = {}
@@ -783,6 +793,8 @@ def association_ue_antenne(pathlosses, antennas, ues):
     return antennas, ues
 
 # Fonction retournant si nous sommes en mode de lecture ou d'ecriture
+# Nbre de param : 1 (fichier_de_cas)
+# Valeur de retour: nom_du_fichier, mode (lecture  ou ecriture)
 def check_coord_files_mode(fichier_de_cas):
     nom_du_fichier = ""
     
