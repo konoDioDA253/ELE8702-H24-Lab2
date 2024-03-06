@@ -75,6 +75,7 @@ class UE:
         self.los = True       # LoS ou non (bool)
         self.gen = None       # type de géneration de coordonnées: 'g', 'a', etc. (str)
 
+# Cette classe est utilise pour repertorier tous les pathloss calculer avec les antenne et les ues utilisés
 class Pathloss:
 
      def __init__(self, id_ue, id_ant):
@@ -92,6 +93,7 @@ def ERROR(msg , code = 1):
     sys.exit(code)
 
 # Fonction permettant de creer une grille pour la generation des coordonnees d'antenne
+# Valeur de retour : coords = couple de coordonees
 def fill_up_the_lattice(N, lh, lv, nh, nv):
     """Function appelée par get_rectangle_lattice_coords()"""
     
@@ -172,7 +174,10 @@ def check_string_presence_in_yaml(string_to_check, yaml_data):
                 return True
     return False
 
+
 # Fonction permettant de trouver la valeur d'une cle dans un fichier YAML
+# Nbre Param: 5 (key = clé recherché, data = contenu fichier yaml, res = valeur rechercher, curr_level = niveau actuel, min_level =  niveau minimal de profondeur à partir duquel la recherche est autorisée)
+# Valeur de retour: res = valeur rechercher
 def get_from_dict(key, data, res=None, curr_level = 1, min_level = 1):
     """Fonction qui retourne la valeur de n'importe quel clé du dictionnaire
        key: clé associé à la valeur recherchée
@@ -214,7 +219,8 @@ def read_yaml_file(fname):
         return yaml.safe_load(file)
 
 # Fonction attribuant des coordonnées aléatoires
-# Prends en paramètre le fichier de cas pour avoir la longueur et la largeur du terrain    
+# Prends en paramètre le fichier de cas pour avoir la longueur et la largeur du terrain  
+# Valeur de retour: coordonnees_aleatoires = valeur nuérique des coodonnées aléatoire  
 def gen_random_coords(fichier_de_cas):
     # Cette fonction doit générer les coordonées pour le cas de positionnement aléatoire
     # TODO PRESENTABLE
@@ -233,6 +239,8 @@ def gen_random_coords(fichier_de_cas):
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN WRITE**************
 # Fonction initialisant une liste de ues et assignant des coordonnées aléatoirement à chaque ue dans la liste
+# Nbre de parametre: 2
+# Valeur de retour: liste_ues_avec_coordonnees = la liste de tous les ue avec leurs coordonnées
 def assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices):
     liste_ues_avec_coordonnees = []
     terrain_shape =  get_from_dict('Surface',fichier_de_cas)
@@ -267,6 +275,8 @@ def assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices):
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN WRITE**************
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
+# Nbre de parametre: 2
+# Valeur de retour: liste_antennes_avec_coordonnees = la liste de tous les antenne avec leurs coordonnées
 def assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices):
     liste_antennes_avec_coordonnees = []
     terrain_shape =  get_from_dict('Surface',fichier_de_cas)
@@ -389,6 +399,7 @@ def write_coordinates_to_file(antennas, ues, fichier_de_cas):
         return
 
 # Fonction qui écrire dans un fichier la valeurs des pathlosses calculer, l'id de l'ue et des antennes associés et le senario utilisé et le model
+# Paramatre: 2 (pathlosses = liste des pathlosses calculer , fichier_de_cas = nom du fichier dans lequel on veut ecrire)
 def write_pathloss_to_file(pathlosses, fichier_de_cas):
     filename = pathloss_file_name
     with open(filename, 'w') as file:
@@ -406,8 +417,9 @@ def write_pathloss_to_file(pathlosses, fichier_de_cas):
     print(f"INFO : Wrote file '{filename}' in the current directory.")
 
 # Fonction qui ecrit dans un fichier l'id de l'antenne et tous les id des ues associees
+# Parametre : 1 (liste des antennes)
 def write_assoc_ues_to_file(antennas):
-    filename = assoc_antennas_file_name
+    filename = assoc_antennas_file_name # nom du fichier dans lequel on veut ecrire 
     with open(filename, 'w') as file:
         for antenna in antennas:
             line = f"{antenna.id}"
@@ -418,8 +430,9 @@ def write_assoc_ues_to_file(antennas):
     print(f"INFO : Wrote file '{filename}' in the current directory.")
 
 # Fonction qui ecrit dans un fichier l'id de l'ue avec l'antenne associee
+# Parametre : 1 (liste des UEs)
 def write_assoc_ant_to_file(ues):
-    filename = assoc_ues_file_name
+    filename = assoc_ues_file_name # nom du fichier dans lequel on veut ecrire 
     with open(filename, 'w') as file:
         for ue in ues:
             line = f"{ue.id}\t{ue.assoc_ant}\n"
@@ -428,12 +441,14 @@ def write_assoc_ant_to_file(ues):
 
 
 # Fonction calculant la distance entre deux point sur le terrain
+# Nbre Param: 2 (coodonnées du point 1 et 2 )
 def calculate_distance(coord1, coord2):
     x1, y1 = coord1
     x2, y2 = coord2
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 # Fonction donnant le group et les coords a partir du ID d'un objet dans une liste du meme objet
+# Nbre param : 2 (object_list = liste d'objet , target_id = identifiant de l'objet a recupérer)
 def get_group_and_coords_by_id(object_list, target_id):
     for object in object_list:
         if object.id == target_id:
