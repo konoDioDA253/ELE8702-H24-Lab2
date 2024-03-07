@@ -85,6 +85,7 @@ class Pathloss:
         self.value = None   # Valeur du pathloss
 
 # Fonction permettant d'afficher un message d'erreur et de stopper le programme
+# Nbre de param : 2 (msg = message , code = code d'erreur)
 def ERROR(msg , code = 1):
     print("\n\n\nERROR\nPROGRAM STOPPED!!!\n")
     if msg:
@@ -241,7 +242,7 @@ def gen_random_coords(fichier_de_cas):
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN WRITE**************
 # Fonction initialisant une liste de ues et assignant des coordonnées aléatoirement à chaque ue dans la liste
-# Nbre de parametre: 2
+# Nbre de parametre: 2 (fichier_de_cas = fichier de cas , fichier_de_devices = fichier de devices)
 # Valeur de retour: liste_ues_avec_coordonnees = la liste de tous les ue avec leurs coordonnées
 def assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices):
     liste_ues_avec_coordonnees = []
@@ -277,7 +278,7 @@ def assigner_coordonnees_ues(fichier_de_cas, fichier_de_devices):
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN WRITE**************
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
-# Nbre de parametre: 2
+# Nbre de parametre: 2 (fichier_de_cas = fichier de cas , fichier_de_devices = fichier de device)
 # Valeur de retour: liste_antennes_avec_coordonnees = la liste de tous les antenne avec leurs coordonnées
 def assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices):
     liste_antennes_avec_coordonnees = []
@@ -314,7 +315,9 @@ def assigner_coordonnees_antennes(fichier_de_cas, fichier_de_devices):
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN READ**************
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
-# Nbre de param: 1 (filename = nom du fichier a lire) ??? Pourquoi est-ce qu'on retourne une liste ici il faut juste lire
+# Nbre de param: 1 (filename = nom du fichier a lire) 
+# Valeur de retour: liste_ues_avec_coordonnees = liste des ues avec leur coordonnées
+
 def lire_coordonnees_ues(filename):
     liste_ues_avec_coordonnees = []
     print(f"INFO : Reading UEs data in file '{filename}' in the current directory.")
@@ -346,6 +349,8 @@ def lire_coordonnees_ues(filename):
 
 # ***********APPELER SEULEEMENT DANS LE CAS D'UN READ**************
 # Fonction initialisant une liste de antennes et assignant des coordonnées selon la grille à chaque antenne
+# Nbre param: 2 (filename = fichier dans lequel on veux lire les données)
+# Valeur de retour: Liste des antenne 
 def lire_coordonnees_antennes(filename):
     liste_antennes_avec_coordonnees = []
     print(f"INFO : Reading antennas data in file '{filename}' in the current directory.")
@@ -378,6 +383,7 @@ def lire_coordonnees_antennes(filename):
 
 
 # Fonction ecrivant un log_message dans un nouveau fichier 
+# Nbre de param: 2 (filename = nom du fichier dans lequel un veut ecrire, log_message = message à ecrire)
 def write_to_file(filename, log_message):
     with open(filename, 'w') as file:
         file.write(log_message)
@@ -461,6 +467,8 @@ def get_group_and_coords_by_id(object_list, target_id):
     return None  
 
 # Fonction permettant de verifier que les conditions d'application du model okumura sont respectes (sauf pour la distance UE-Antenne)
+# Nbre param: 5 (fc = frequence de l'antenne,ht = hauteur de l'antenne,hr = hauteur de l'ue, antenna_group = le grouppe de l'antenne, ue_group =le groppe de l'ue)
+# Valeur de retour: bolleen
 def verify_okumura_conditions(fc,ht,hr, antenna_group, ue_group): 
     if fc > 1500 :
         ERROR(f"""La fréquence {fc} MHz du groupe d'antenne '{antenna_group}' introduite dans le fichier de cas YAML est plus grande que 1.5 GHz. 
@@ -490,6 +498,7 @@ Veuillez changer le groupe de l'ue consideree dans le fichier YAML de cas ou mod
 
 # Fonction permettant de calculer le pathloss entre une antenne et une UE tout en verifiant les condition d'application
 # Nbre de parametre: 6 (fichier_de_cas, fichier_de_device, antenna_id = identifiant de l'antenne, ue_id = identifiant de l'ue, antennas = liste des antennes, ues = liste des ues)
+# valeur de retour: pathloss = valeur numerique du pathloss calculer, warning_message = le message d'erreur
 def okumura(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     model = get_from_dict('model', fichier_de_cas)
     scenario = get_from_dict('scenario', fichier_de_cas)
@@ -882,6 +891,9 @@ def lab2 (data_case):
     return (antennas,ues)
 
 # Fonction vérifiant si le fichier YAML fournit en input a la bonne structure 
+# Nbre param: 1 (file_path = nom du fichier ayant la stucture )
+# Valeur de retour : booleen
+
 def validate_yaml_structure(file_path):
     try:
         with open(file_path, 'r') as file:
@@ -922,6 +934,8 @@ def validate_yaml_structure(file_path):
     return True
 
 # Fonction comparant deux structures YAML et retournant False si différence existe
+# Nbre de param: 2 (content = contenue , expected_structure = la structure au quelle on s'attend)
+# variable de retour: booleen
 def validate_structure(content, expected_structure):
     if not isinstance(content, dict) or not isinstance(expected_structure, dict):
         return False
@@ -936,6 +950,7 @@ def validate_structure(content, expected_structure):
     return True
 
 # Fonction permettant d'afficher la disposition des equiepements Antennes et UEs sur un plot
+# Nbre param: 2 ( antennas = liste des antennes , ues = liste des ues)
 def plot_equipment_positions(antennas, ues):
     # Créer une nouvelle figure
     plt.figure(figsize=(8, 6))
@@ -966,6 +981,8 @@ def plot_equipment_positions(antennas, ues):
     
 
 # Fonction permettant de traiter les arguments en entree de la commande CLI python pour lancer le code source
+# Nombre d'argument: 1 (arg = argument )
+# Valeur de retour : YAML_file_exists, YAML_file_correct_extension, correct_yaml_structure, case_file_name
 def treat_cli_args(arg):
     # arg est une liste qui contient les arguments utilisés lors de l'appel du programme par CLI. 
     # Cette fonction doit retourner le nom du fichier de cas à partir de l'interface de commande (CLI)
@@ -1003,6 +1020,7 @@ def treat_cli_args(arg):
     return YAML_file_exists, YAML_file_correct_extension, correct_yaml_structure, case_file_name
 
 # Fonction faisant un sanity check (verification) sur les dimensions du terrain et affiche un warning le cas échéant
+# Nbre de param: 1 (ficchier_de_cas)
 def sanity_check_dimensions(fichier_de_cas):
     length = get_from_dict('length', fichier_de_cas)
     height = get_from_dict('height', fichier_de_cas)
@@ -1017,6 +1035,7 @@ def sanity_check_dimensions(fichier_de_cas):
 
 # Fonction vérifiant si le programme doit fournir un fichier log des warnings du calcul des pathloss
 # Si des warning concernant le calcul des pathloss sont apparus, ils se retrouvent dans ce fichier
+# Nbre de param: 3 (warning_log = warning message , filename = nom du fichier des warning, fichier_de_cas)
 def write_pathloss_warning_log_file(warning_log, filename, fichier_de_cas):
     if warning_log == "":
         print("Aucun problem lors du calcul des pathloss!")

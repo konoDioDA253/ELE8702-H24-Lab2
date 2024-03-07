@@ -76,6 +76,7 @@ Le programme poursuit malgré cela en assumant les valeurs fournies pour cette c
 
 # Cas RMA LOS : Cette fonction permet de calculer le pathloss d'une combianaison d'ue et antenne lorsque ces derniers sont aligées
 # Nbre de param: 6 (fichier_de_cas, fichier_de_device, antenna_id = identifiant de l'antenne, ue_id = identiafiant de l'ue, antennas = liste des antenne, ues = liste des ue)
+# Valeur de retour: pl = pathloss calculer
 def rma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     
     # Definition des fonctions retourne le minimum des deux valeurs passées en paramétre
@@ -146,6 +147,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
 
 # Cas RMA NLOS :Cette fonction permet de calculer le pathloss d'une combianaison d'ue et antenne lorsque ces derniers sont non aligées
 # Nbre de param: 6 (fichier_de_cas, fichier_de_device, antenna_id = identifiant de l'antenne, ue_id = identiafiant de l'ue, antennas = liste des antenne, ues = liste des ue)
+# Valeur de retour: pathloss = pathloss calculer, warning_message = message d'avertissement
 def rma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues) :
     
     # Definition des fonctions (fonction retournant le max des deux valeurs passée en paramètre et un message d'avertissement)
@@ -232,6 +234,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
 
 # Cas UMA LOS : Cette fonction permet de calculer le pathloss d'une combianaison d'ue et antenne lorsque ces derniers sont aligées
 # Nbre de param: 6 (fichier_de_cas, fichier_de_device, antenna_id = identifiant de l'antenne, ue_id = identiafiant de l'ue, antennas = liste des antenne, ues = liste des ue)
+# valeur de retour: pathloss= pathloss calculer , warning_message = message d'avertissement
 def uma_los(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues):
     
     # cette fonction calcul le pathloss pour la valeur de distance  et la fréquence passer en paramétre
@@ -291,6 +294,7 @@ Nous considerons un pathloss valant INFINI entre ces deux equipements\n"""
 
 # Cas UMA LOS : Cette fonction permet de calculer le pathloss d'une combianaison d'ue et antenne lorsque ces derniers sont non aligées
 # Nbre de param: 6 (fichier_de_cas, fichier_de_device, antenna_id = identifiant de l'antenne, ue_id = identiafiant de l'ue, antennas = liste des antenne, ues = liste des ue)
+# valeur de retour: pathloss= pathloss calculer , warning_message = message d'avertissement
 def uma_nlos(fichier_de_cas, fichier_de_device, antenna_id, ue_id, antennas, ues) :
     
 
