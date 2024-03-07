@@ -645,8 +645,9 @@ def sanity_check_visibility_file(filename, nombre_ue, ues, antennas):
         first_digits_set = set()
         for line in lines:
             ue_numbers = line.strip().split()
-            if len(ue_numbers) != len(set(ue_numbers)):
-                ERROR(f"Il y a des répétitions de id d'antenne dans une ligne du fichier '{filename}'.")
+            ant_line = ue_numbers[1:]
+            if len(ant_line) != len(set(ant_line)):
+                ERROR(f"Il y a des répétitions de id d'antenne dans la ligne {ue_numbers} du fichier '{filename}'.")
 
             if len(ue_numbers) < 2:
                 ERROR(f"Chaque ligne du fichier '{filename}' doit contenir au moins deux chiffres (UE et antenne).")

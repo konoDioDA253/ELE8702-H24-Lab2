@@ -9,7 +9,7 @@
 ETUDE_PATHLOSS:
    PATHLOSS :
        model : 3gpp
-       scenario : rMa
+       scenario : RMa
    ANT_COORD_GEN : g
    UE_COORD_GEN: a
    COORD_FILES:  # Utilisé quand les coordonées sont lues à partir d'un fichier.
